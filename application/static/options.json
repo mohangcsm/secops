@@ -1,0 +1,43 @@
+{
+    "forward_proxy" :   {
+        "Vendor Onboarding" : "vendor_onboarding",
+        "Data validated" : "data_validation",
+        "Target on HTTPS" : "https"
+    },
+    "reverse_proxy" : {
+        "Application sec-reviewed" : "application_review",
+        "Target on HTTPS" : "https",
+        "IP whitelisting" : "ip_whitelisting"
+    },
+    "ip_domain_whitelist" : {
+        "Vendor Onboarding" : "vendor_onboarding",
+        "Target on HTTPS" : "https",
+        "Internal whitelisting" : "internal" 
+    },
+    "client_rfp" : {
+        "RFP Document Updated" : "rfp_updated",
+        "New/Updated Policy Documents Shared" : "policy_shared"
+    },
+    "prd_review" : {
+        "Overall Review" : "overall_review",
+        "other_options" : true
+    },
+    "sec_bug" : {
+        "Fix Verified Dynamically" : "fix_verified",
+        "Code Review Done" : "code_verified"
+    },
+    "others" : {
+        "Internal whitelisting" : "internal",
+        "Authentication Checks" : "Authentication",
+        "Authorization Checks" : "Authorization",
+        "Session Handling": "Session",
+        "Exception Handling" : "Exception",
+        "Input Handling" : "Input",
+        "Injection Attacks" : "Injection",
+        "Logical Attacks" : "Logical",
+        "File Upload checks" : "File-Upload",
+        "Third Party CMS" : "third_party_cms",
+        "Reverse Engineering Checks" : "reverse_engg",
+        "Security Code Review" : "sec_code_review"
+    }
+}

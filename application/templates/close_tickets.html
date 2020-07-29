@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>SECOPS</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/static/images/favicon.png" type="image/png" sizes="16x16">
+  <link href='/static/external/css.css' rel='stylesheet' type='text/css'> 
+  <link rel="stylesheet" href="/static/external/bootstrap.min.css">
+  <script src="/static/external/jquery-1.12.4.js"></script>
+  <script src="/static/external/bootstrap.min.js"></script>
+  <script src="/static/external/index.js"></script>
+  <link rel="stylesheet" href="/static/css/close_style.css">
+
+<script>
+  
+
+
+</script>
+</head>
+<body>
+<!-- navbar -->
+    {% include "nav.html" %}
+<!-- navbar -->
+<div style='padding-top: 70px'></div>
+  <div align="center">
+        <span class="label label-success"><span class="glyphicon glyphicon-road"></span>&nbsp;&nbsp;In Progress</span>&nbsp;&nbsp;&nbsp;&nbsp;
+        <span class="label label-warning"><span class="glyphicon glyphicon-time"></span>&nbsp;&nbsp;Waiting for Developers</span>&nbsp;&nbsp;&nbsp;&nbsp;
+        <span class="label label-info"><span class="glyphicon glyphicon-hourglass"></span>&nbsp;&nbsp;Open</span>&nbsp;&nbsp;&nbsp;
+        <span class="label label-danger"><span class="glyphicon glyphicon-fire"></span>&nbsp;&nbsp;Under Review</span>&nbsp;&nbsp;&nbsp;
+  </div><br/>
+<div>
+<div class="container-fluid">
+ <style>
+  body {  
+    /*background: url("back1.jpg") no-repeat center center fixed; */
+    background-size: cover;
+}
+
+.hidden {
+  display: none;
+}
+
+.shown {
+  display: block;
+}
+
+</style>  
+<div align="center">
+  <div style="max-width: 800px" align="left">
+  <div class="container" align="center">
+    {% if message %}
+        <div class="alert alert-{{ category }}" role="alert" style="width: 50%">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span></button>
+      {{ message | safe }}
+      </div>
+    {% endif %}
+  </div>
+
+<H3>Welcome {{session.email}}</H3>
+<script>$('.icon_info').tooltip();</script>
+<style>.container { width: 70%; } .red { color: red; } .blue { color: blue;} .green { color: green; } .orange { color: orange; } </style>
+
+<div id="ticket_details" class="shown">
+{% if secreview_string != "" %}
+  <br/><H4>Open Security Reviews :</H4>
+  <table>
+    {{secreview_string|safe}}
+  </table>
+
+{% endif %}
+
+{% if secbugs_string != "" %}
+  <br/><H4>Open Security Bugs :</H4>
+  <table>
+    {{secbugs_string|safe}}
+  </table>
+
+{% endif %}
+  </div>
+<script>
+  issue_status = "";
+  issue_key = "";
+</script>
+  <div class="hidden" id="description">
+    <form action="/close_tickets" method="POST" enctype="multipart/form-data"><br />
+    <div id="ticket_meta">
+      <div class="pull-right">
+        <button class="btn btn-warning btn-md float-right" onclick="return go_back()">back</label>
+      </div>
+      <label>Ticket No</label> &nbsp;&nbsp;#&nbsp;&nbsp;<span id="key" class="label label-info"></span><br />
+      <label>Title</label>&nbsp;&nbsp;#&nbsp;&nbsp;<span id="summary" class="label label-default">summary</span></br>
+      <label>Status</label>&nbsp;&nbsp;#&nbsp;&nbsp;<span id="status" class="label label-warning"></span></br></br>
+    </div>
+
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><span class="label label-success">Test Cases Covered</span></div>
+  
+      <!-- List group -->
+      <ul class="list-group" name="test_cases" id="ticket_options" >
+      </ul>
+      <input type="hidden" name="ticket_id" id="ticket_id" value="">
+      <input type="hidden" name="status" id="ticket_status" value="">
+      <input type="hidden" name="requestingfor" id="requestingfor" value="">
+    </div> 
+    <H4><span class=" label label-info">Any Additional Comments? (Mandatory for Reject)</span></H4>
+    <textarea class="form-control" rows=3 class="form-control" type="text" id="comments" name="comments"></textarea><br/>
+    <script>
+      var peer_review_enabled = {{peer_review_enabled|safe}};
+      PEER_REVIEW_REQUIRED_FOR = [];
+      if(peer_review_enabled)
+        PEER_REVIEW_REQUIRED_FOR = {{PEER_REVIEW_REQUIRED_FOR|safe}};
+    </script>
+    <div id="action" style="width: 200px">
+
+    </div><br /><br />
+    </form>
+  </div>
+
+  <br /><br /><br /><br />
+  </div>
+
+    <!-- Footer -->
+    {% extends "footer.html" %}
+    <!-- Footer -->
+</body>
+</html>

@@ -1,0 +1,50 @@
+
+
+  <link rel="icon" href="/static/images/favicon.png" type="image/png" sizes="16x16">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="/static/external/jquery-1.12.4.js"></script>
+  <link rel="stylesheet" href="/static/external/bootstrap.min.css">
+  <script src="/static/external/bootstrap.min.js"></script>
+  <link href='/static/css/style.css' rel='stylesheet' type='text/css'> 
+
+<!-- navbar -->
+    {% include "nav.html" %}
+<!-- navbar -->
+<br /><br /><br /><br />
+
+  <div align="center" class="container"> 
+    {% if message %}
+      <div class="container" align="center">
+        <div class="alert alert-{{ category }}" role="alert" style="width: 50%">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        {{ message | e }}
+      </div>
+    {% endif %}
+    <div>
+      <style>
+      hr {
+        color: #424A50;
+      }
+      </style>
+      <img src="/static/images/logo1.png" alt="" width="240px" />
+      <hr noshade><br>
+      <h4>
+        <a href="/login">
+          <img src="/static/images/glogin.png" alt="Login Here" width="320px"/>
+        </a>
+      </h4>
+      <div style="width:80%; color: #40647C">
+	     <br><br>
+
+        <h5>
+          SECOPS Framework has below functional benifits over a common bug/issue tracking system,
+            <br /><br /> - Helps Security Teams to gather initial information in a systematic way.
+            <br /> - Allows to integrate various other security tools via REST Apis.
+            <br /> - Bring audit capabilities to different types of security operations.
+        </h5>
+      </div>
+    </div>
+  </div>
+<!-- Footer -->
+{% extends "footer.html" %}
+<!-- Footer -->
