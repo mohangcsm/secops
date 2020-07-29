@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>SECOPS</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/static/images/favicon.png" type="image/png" sizes="16x16">
+  <link href='/static/external/css.css' rel='stylesheet' type='text/css'> 
+  <link rel="stylesheet" href="/static/external/bootstrap.min.css">
+  <script src="/static/external/jquery-1.12.4.js"></script>
+  <script src="/static/external/bootstrap.min.js"></script>
+  <link href='/static/css/close_style.css' rel='stylesheet' type='text/css'> 
+  <script src='/static/external/index.js'></script>
+
+    <style type="text/css">
+      .line-spaccing {
+        margin-bottom: 10px;
+      }
+      .close {
+        background-color: #182530;
+        color:white !important;
+        text-align: center;
+        font-size: 30px;
+      }
+    </style>
+
+
+</head>
+<body>
+<!-- navbar -->
+    {% include "nav.html" %}
+<!-- navbar -->
+<br /><br /><br />
+<div>
+<div class="container-fluid">
+  <div class="container" align="center">
+    {% if message %}
+        <div class="alert alert-{{ category }}" role="alert" style="width: 50%">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span></button>
+      {{ message | safe }}
+      </div>
+    {% endif %}
+  </div>
+  
+  <div class="container" style="max-width: 650px">
+    <div class="form-group">
+      <h4><label class="control-label">Requesting Jira For?</label></h4>
+      <script type="text/javascript">
+      var base_options = request_options_all['base_options'];
+      
+      msg = '<select id="request" style = "margin-bottom: 10px" class="form-control" title="Choose one of the following..." onchange="requestingfor()">';
+      msg += '<option disabled selected value="">Choose here</option>';
+        
+      for(key in base_options){
+        msg += '<optgroup label="'+key+'">';
+        for(ele in base_options[key]){
+          msg += '<option value="'+base_options[key][ele]+'">'+ele+'</option>';
+        }
+        msg += '</optgroup>';
+      }
+      document.write(msg);
+      </script>
+      </select>
+
+      <div class="description description-hide" id="description">
+        <form id="form_div" role="form" action="create_secreview" method="post" >
+        </form>
+      </div>
+        <br><br><br><br>
+        
+    </div><!-- /.container -->
+<script>$(function () 
+      { $("[data-toggle='popover']").popover();
+      });
+   </script>
+    <!-- Footer -->
+    {% extends "footer.html" %}
+    <!-- Footer -->
+</body>
+</html>

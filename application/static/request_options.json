@@ -1,0 +1,633 @@
+{
+    "base_options" : {
+        "New Infosec Request" : {
+            "Client RFP" : "client_rfp"
+        },
+        "New Application" :   {
+            "Web App" : "new_web_app",
+            "Mobile App" : "new_mobile_app",
+            "Rest Api's" : "new_rest_api"
+        },
+        "Existing Application" :   {
+            "Web App" : "existing_web_app",
+            "Mobile App" : "existing_mobile_app",
+            "Rest Api's" : "existing_rest_api"
+        },
+        "Infra Request" :   {
+            "New AMI Testing" : "new_ami",
+            "New DataStore" : "new_datastore",
+            "Security Group Modification" : "sg_request",
+            "Port Opening/Modification" : "sg_request",
+            "Whitelisting" : "whitelisting"
+        },
+        "Others" : {
+            "PRD Document Review" : "prd_review",
+            "Architecture Review" : "arch_review",
+            "Security Bug" : "sec_bug",
+            "Others" : "others"
+        }
+    },
+    "request_options" : {
+        "client_rfp" : [
+            {
+                "label" : "Client Information",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Client Name",
+                "elementType" : "input"
+            },{
+                "type" : "text",
+                "name" : "exisiting_client",
+                "placeholder" : "new/exisinting client",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Sales POC Name: \nDev POC Name: \n",
+                "elementType" : "textarea"
+            },
+            {
+                "type" : "text",
+                "label" : "Existing Files",
+                "name" : "Existing_Files",
+                "placeholder" : "Upload files into google drive and provide link here",
+                "elementType" : "input"  
+            }
+        ],
+        "new_web_app" : [
+            {
+                "label" : "Enter Project Details below",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Project Title",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "PRD",
+                "placeholder" : "Link to the PRD / Documentation that explains the feature ",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Enter Stage Environment details below",
+                "type" : "text",
+                "name" : "Test Urls",
+                "placeholder" : "Non-Production environment URLS ",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Number of URLS",
+                "placeholder" : "Estimated number of URLS",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Enter Code repo details below",
+                "type" : "text",
+                "name" : "Github Repo",
+                "placeholder" : "Github Repo URL",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Github Branch",
+                "placeholder" : "Github Branch (default: master)",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Enter Techstack details below",
+                "type" : "text",
+                "name" : "Technologies Used",
+                "placeholder" : "Technologies Used",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Third Party Intergration",
+                "placeholder" : "Any 3rd Party Integration involved?  (If yes, Mention the details)",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Architect Name:\nProduct Owner Name:\nDev POC Name:\n",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Enter activity details below",
+                "type" : "text",
+                "name" : "Jira Project",
+                "placeholder" : "JIRA Project/Sprint of that product/feature ",
+                "elementType" : "input"
+            }
+        ],
+        "new_mobile_app" : [
+            {
+                "label" : "Enter Project Details below",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Project Title",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "PRD",
+                "placeholder" : "Link to the PRD / Documentation / Confluence that explains the feature ",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Provide App details below",
+                "type" : "text",
+                "name" : "App Details",
+                "placeholder" : "Upload app into google drive and provide link here",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Number of URLS",
+                "placeholder" : "Estimated number of URLS",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Enter Backend Code repo details below",
+                "type" : "text",
+                "name" : "Github Repo",
+                "placeholder" : "Github Repo URL",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Github Branch",
+                "placeholder" : "Github Branch (default: master)",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Architect Name:\nProduct Owner Name:\nDev POC Name:\n",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Enter activity details below",
+                "type" : "text",
+                "name" : "Jira Project",
+                "placeholder" : "JIRA Project/Sprint of that product/feature ",
+                "elementType" : "input"
+            }
+        ],
+        "new_rest_api" : [
+            {
+                "label" : "Enter Project Details below",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Project Title",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "PRD",
+                "placeholder" : "Link to the PRD / Documentation / Confluence that explains the feature ",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Provide Stage Environment details below",
+                "type" : "text",
+                "name" : "Environment Details",
+                "placeholder" : "Stage Domain/IP",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Postman Collection",
+                "placeholder" : "Postman/Swagger collection url",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Number of APIs",
+                "placeholder" : "Total number of APIs",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Enter Backend Code repo details below",
+                "type" : "text",
+                "name" : "Github Repo",
+                "placeholder" : "Github Repo URL",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Github Branch",
+                "placeholder" : "Github Branch (default: master)",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Architect Name:\nProduct Owner Name:\nDev POC Name:\n",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Enter activity details below",
+                "type" : "text",
+                "name" : "Jira Project",
+                "placeholder" : "JIRA Project/Sprint of that product/feature ",
+                "elementType" : "input"
+            }
+        ],
+        "existing_web_app" : [
+            {
+                "label" : "Enter Project Details below",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Project Title",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "PRD",
+                "placeholder" : "Link to the PRD / Documentation that explains the feature ",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Enter Stage Environment details below",
+                "type" : "text",
+                "name" : "Test Urls",
+                "placeholder" : "Non-Production environment URLS ",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Number of URLS",
+                "placeholder" : "Estimated number of URLS",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Enter Code repo details below",
+                "type" : "text",
+                "name" : "Github Repo",
+                "placeholder" : "Github Repo URL",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Github Branch",
+                "placeholder" : "Github Branch (default: master)",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Enter Techstack details below",
+                "type" : "text",
+                "name" : "Technologies Used",
+                "placeholder" : "Technologies Used",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Third Party Intergration",
+                "placeholder" : "Any 3rd Party Integration involved?  (If yes, Mention the details)",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Architect Name:\nProduct Owner Name:\nDev POC Name:\n",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Enter activity details below",
+                "type" : "text",
+                "name" : "Jira Project",
+                "placeholder" : "JIRA Project/Sprint of that product/feature ",
+                "elementType" : "input"
+            }
+        ],
+        "existing_mobile_app" : [
+            {
+                "label" : "Enter Project Details below",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Project Title",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "PRD",
+                "placeholder" : "Link to the PRD / Documentation / Confluence that explains the feature ",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Provide App details below",
+                "type" : "text",
+                "name" : "App Details",
+                "placeholder" : "Upload app into google drive and provide link here",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Number of URLS",
+                "placeholder" : "Estimated number of URLS",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Enter Backend Code repo details below",
+                "type" : "text",
+                "name" : "Github Repo",
+                "placeholder" : "Github Repo URL",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Github Branch",
+                "placeholder" : "Github Branch (default: master)",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Architect Name:\nProduct Owner Name:\nDev POC Name:\n",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Enter activity details below",
+                "type" : "text",
+                "name" : "Jira Project",
+                "placeholder" : "JIRA Project/Sprint of that product/feature ",
+                "elementType" : "input"
+            }
+        ],
+        "existing_rest_api" : [
+            {
+                "label" : "Enter Project Details below",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Project Title",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "PRD",
+                "placeholder" : "Link to the PRD / Documentation / Confluence that explains the feature ",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Provide Stage Environment details below",
+                "type" : "text",
+                "name" : "Environment Details",
+                "placeholder" : "Stage Domain/IP",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Postman Collection",
+                "placeholder" : "Postman/Swagger collection url",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Number of APIs",
+                "placeholder" : "Total number of APIs",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Enter Backend Code repo details below",
+                "type" : "text",
+                "name" : "Github Repo",
+                "placeholder" : "Github Repo URL",
+                "elementType" : "input"
+            },
+            {
+                "type" : "text",
+                "name" : "Github Branch",
+                "placeholder" : "Github Branch (default: master)",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Architect Name:\nProduct Owner Name:\nDev POC Name:\n",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Enter activity details below",
+                "type" : "text",
+                "name" : "Jira Project",
+                "placeholder" : "JIRA Project/Sprint of that product/feature ",
+                "elementType" : "input"
+            }
+        ],
+        "new_ami" : [
+            {
+                "label" : "Enter Application/Service details below",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Application/Service Name here",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Give AMI Details below",
+                "type" : "text",
+                "name" : "AMI Id",
+                "placeholder" : "AMI ID/Name here",
+                "elementType" : "input"  
+            },
+            {
+                "name" : "Service Description",
+                "innerHtml" : "Explain breifly about the service to be running on this AMI",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Architect Name:\nProduct Owner Name:\nDev POC Name:\n",
+                "elementType" : "textarea"
+            }
+        ],
+        "new_datastore" : [
+            {
+                "label" : "Enter Application/Service details below",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Application/Service Name here",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Give DataStore Details below",
+                "type" : "text",
+                "name" : "DataStore Name",
+                "placeholder" : "Required DataStore Name here (Mongo/ES/Kafka/Others)",
+                "elementType" : "input"  
+            },
+            {
+                "name" : "Requirement",
+                "innerHtml" : "Explain breifly about the DataStore requirement here",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Architect Name:\nProduct Owner Name:\nDev POC Name:\n",
+                "elementType" : "textarea"
+            }
+        ],
+        "sg_request" : [
+            {
+                "label" : "Enter Application/Service details below",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Application/Service Name that is going to use the SG",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Give Security Group Details below",
+                "type" : "text",
+                "name" : "Security Group Name",
+                "placeholder" : "SG Name / ID here (N/A if new requirement )",
+                "elementType" : "input"  
+            },
+            {
+                "name" : "Requirement",
+                "innerHtml" : "Explain breifly about the Security Group creation/modification requirement here (instance whitelisting/Ports opening etc)",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Architect Name:\nProduct Owner Name:\nDev POC Name:\n",
+                "elementType" : "textarea"
+            }
+        ],
+        "whitelisting" : [
+            {
+                "label" : "Enter Application/Service details below",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Application/Service Name that is going to use the whitelisting",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Please enter the requirement details below",
+                "name" : "description",
+                "placeholder" : "Describe the reason for whitelisting here",
+                "elementType" : "input"   
+            },
+            {
+                "label" : "Describe source and destination",
+                "name" : "source",
+                "innerHtml" : "Source IP/range and port details here. NA in case google sheet is provided.",
+                "elementType" : "textarea"
+            },
+            {
+                "name" : "destination",
+                "innerHtml" : "Destination IP/range and port details here. NA in case google sheet is provided.",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "If more than 3 sets are required, please add them in a google sheet and share here",
+                "name" : "link",
+                "placeholder" : "google sheet link",
+                "elementType" : "input"
+            }
+
+        ],
+        "others" : [
+            {
+                "label" : "Please enter the requirement below",
+                "name" : "others",
+                "innerHtml" : "",
+                "elementType" : "textarea"
+            }
+        ],
+        "prd_review" : [
+            {
+                "label" : "Product Information",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Application Name",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Please enter the PRD (google doc/confluence page) link below",
+                "name" : "documentation",
+                "innerHtml" : "",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Architect Name:\nProduct Owner Name:\nDev POC Name:\n",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Go-Live / Expected ETA date here",
+                "name" : "go-date",
+                "type" : "date",
+                "elementType" : "input"
+            }
+        ],
+        "arch_review" : [
+            {
+                "label" : "Product Information",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Application Name",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Please enter the Architecture (google doc/confluence page) link below",
+                "name" : "documentation",
+                "innerHtml" : "",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Please add contact details here",
+                "name" : "Owners",
+                "innerHtml" : "Architect Name:\nProduct Owner Name:\nDev POC Name:\n",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Go-Live / Expected ETA date here",
+                "name" : "go-date",
+                "type" : "date",
+                "elementType" : "input"
+            }
+        ],
+        "sec_bug" : [
+            {
+                "label" : "Issue Title",
+                "type" : "text",
+                "name" : "Issue_Title",
+                "placeholder" : "Issue Title Name",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Application Name",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Application Name",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Detailed Steps needed to reproduce the issue",
+                "name" : "steps to reproduce",
+                "innerHtml" : "\n",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Environment Details",
+                "name" : "Environment Details",
+                "innerHtml" : "Application URL:\nEnvironment Type (Production/Stage):\n",
+                "elementType" : "textarea"
+            },
+            {
+                "label" : "Fix Recommendation",
+                "name" : "Recommendation",
+                "innerHtml" : "",
+                "elementType" : "textarea"
+            }
+        ]
+
+    }
+}
+
