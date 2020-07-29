@@ -62,25 +62,25 @@ SECOPS Framework has below functional benifits over a common bug/issue tracking 
 ### Screenshots
 #### Login and Home Page
 
-![Login Page](https://github.com/mohan-moe/SECOPS/raw/devdocs/screenshot/1.png)
+![Login Page](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/1.png)
 
-![Home Page](https://github.com/mohan-moe/SECOPS/raw/devdocs/screenshot/2.png)
+![Home Page](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/2.png)
 
 #### New Security Review
 
-![New Secreview](https://github.com/mohan-moe/SECOPS/raw/devdocs/screenshot/3.png)
+![New Secreview](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/3.png)
 
-![Secreview Options](https://github.com/mohan-moe/SECOPS/raw/devdocs/screenshot/4.png)
+![Secreview Options](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/4.png)
 
 #### Closing Reviews and Bugs
 
-![Close Tickets page](https://github.com/mohan-moe/SECOPS/raw/devdocs/screenshot/5.png)
+![Close Tickets page](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/5.png)
 
-![Closing Options Page](https://github.com/mohan-moe/SECOPS/raw/devdocs/screenshot/6.png)
+![Closing Options Page](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/6.png)
 
 #### Peer Review & Approval Page
 
-![Send for Review Page](https://github.com/mohan-moe/SECOPS/raw/devdocs/screenshot/7.png)
+![Send for Review Page](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/7.png)
 
 
 #### Core Softwares :
