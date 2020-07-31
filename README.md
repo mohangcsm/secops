@@ -60,7 +60,7 @@ $ docker run --rm -d -p 80:80 secops
     - First update the `base_options` section to update the dropdown list
         - to add a new entry into dropdown add the respective **KEY:VALUE** data into JSON object
         
-        For example: to add **new type of review** category under **Others** section, use below
+        For example, to add **new type of review** category under **Others** section, use below
     ```
         "Others" : {
             "PRD Document Review" : "prd_review",
@@ -71,12 +71,12 @@ $ docker run --rm -d -p 80:80 secops
         }
     ```
     - Now add HTML entities into `request_options` section to show the relevent form when the option is selected
-        - label : Any label you want to show before the input element. Update this as needed
-        - name : This will be the parameter name with which the input will be posted to server
-        - innerHtml : prefill data comes here. leave empty string here if prefilling is not needed
-        - placeholder : placeholder to be shown for input text element
-        - elementType : type of html element. must be one of `input/textarea`
-        - type : ignore if elementType is **textarea**. if elementType is **input**  this must be one of `text/file/date`
+        - **label** : Any label you want to show before the input element. Update this as needed
+        - **name** : This will be the parameter name with which the input will be posted to server
+        - **innerHtml** : prefill data comes here. leave empty string here if prefilling is not needed
+        - **placeholder** : placeholder to be shown for input text element
+        - **elementType** : type of html element. must be one of `input/textarea`
+        - **type** : ignore if elementType is **textarea**. if elementType is **input**  this must be one of `text/file/date`
     
         For example, to add a textarea under `new_type_of_review` form, add as below
     ```
