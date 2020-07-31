@@ -53,7 +53,7 @@ $ docker run --rm -d -p 80:80 secops
 - uncomment the `HTTPS` section in `run.py` file and make sure to comment out the `HTTP` section.
 #####
 
-##### Adding New type of Security Requests
+#### Adding New type of Security Requests
 
 - Edit the **application/static/request_options.json** json to add/modify new secreview options
 
@@ -92,7 +92,7 @@ $ docker run --rm -d -p 80:80 secops
     - Similarly, update the JSON file with as many HTML elements as required. 
     - Validate the JSON format before closing the file.
     
-##### Adding New Closing options for Security Reviews
+#### Adding New Closing options for Security Reviews
 
 - Edit the **application/static/options.json** json to add/modify closing options for secreviews
 
