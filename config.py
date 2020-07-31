@@ -20,7 +20,7 @@ class Config(object):
     SECRET_KEY = '$uP36S3c63T'
     DEBUG = True
     ACCESS_LOGFILE_NAME = 'logs/access_log'
-    ERROR_LOGFILE_NAME = 'logs/errot_log'
+    ERROR_LOGFILE_NAME = 'logs/error_log'
     UPLOAD_FOLDER = 'uploads'
     DEFAULT_FOLDER = 'static/default'
     #-----application settings------#
