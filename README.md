@@ -1,3 +1,5 @@
+[![Github Release Version](https://img.shields.io/badge/release-V1.0-blue.svg)](https://github.com/mohangcsm/secops)
+[![Python Version](https://img.shields.io/badge/python-2.7-blue.svg)](https://github.com/mohangcsm/secops)
 
 # SECOPS Framework for Centralised Product Security Operations.
 
@@ -13,12 +15,19 @@ SECOPS Framework has below functional benifits over a common bug/issue tracking 
 - `git clone https://github.com/mohangcsm/secops.git` or download the zip
 - `pip install -r requirements.txt`
 
-
 #### Running SECOPS:
 - run `python run.py` to launch server
 
 - SECOPS server can be accessed from http://server_ip or https://server_ip
 
+
+#### Docker Installation
+```
+$ git clone -b docker https://github.com/mohangcsm/secops.git
+$ cd secops
+$ docker build --rm -t secops .
+$ docker run --rm -d -p 80:80 secops
+```
 
 ##### Things to do before running: 
 - in **config.py**
