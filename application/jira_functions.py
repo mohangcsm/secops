@@ -1,10 +1,15 @@
 
 
-
-def create_new_jira(jira,JIRA_PROJECT,JIRA_TRANSITIONS,product_title="", description="",component="Security Review"):
+def create_new_jira(jira,JIRA_SETTINGS,product_title="", description="",component="Security Review",peer_review_enabled=False):
+    
+    JIRA_PROJECT = JIRA_SETTINGS['JIRA_PROJECT']
+    JIRA_COMPONENTS = JIRA_SETTINGS['JIRA_COMPONENTS']
+    
+    JIRA_TRANSITIONS = JIRA_SETTINGS['JIRA_TRANSITIONS'][peer_review_enabled]
     TODO_TRANS = JIRA_TRANSITIONS['TODO_TRANS']
+
     task = "Task"
-    if component == "Security Bug":
+    if component == JIRA_COMPONENTS["SECURITY_BUG"]:
         task = "Bug"
 
     fields = {
@@ -32,8 +37,13 @@ def create_new_jira(jira,JIRA_PROJECT,JIRA_TRANSITIONS,product_title="", descrip
 
     return None
 
-def get_open_secreviews(jira,JIRA_PROJECT,JIRA_URL):
-    open_issues = jira.search_issues('component in ("Security Bug", "Security Review") AND status not in (Closed, Resolved, Done) AND project = "'+JIRA_PROJECT+'" ORDER BY created DESC')
+def get_open_secreviews(jira,JIRA_SETTINGS):
+
+    JIRA_URL = JIRA_SETTINGS["JIRA_URL"]
+    JIRA_PROJECT = JIRA_SETTINGS["JIRA_PROJECT"]
+    JIRA_COMPONENTS = JIRA_SETTINGS["JIRA_COMPONENTS"]
+
+    open_issues = jira.search_issues('component in ("'+JIRA_COMPONENTS["SECURITY_BUG"]+'","'+JIRA_COMPONENTS["SECURITY_REVIEW"]+'") AND status not in (Closed, Resolved, Done) AND project = "'+JIRA_PROJECT+'" ORDER BY created DESC')
 
     secreview_string = ""
     secbugs_string = ""
@@ -73,12 +83,12 @@ def get_open_secreviews(jira,JIRA_PROJECT,JIRA_URL):
         
         components = open_issue.fields.components
         for component in components:
-            if str(component.name) == "Security Review":
+            if str(component.name) == JIRA_COMPONENTS["SECURITY_REVIEW"]:
                 msg_string += '<td><a class="secreview" onclick="open_issue(\''+key+'\',\''+status+'\',\''+summary+'\',\''+requestingfor+'\')" href="#"><button type="button" class="btn btn-primary pull-right">Close Ticket</button></a></td></tr>'
                 secreview_string += msg_string
                 break
 
-            if str(component.name) == "Security Bug":
+            if str(component.name) == JIRA_COMPONENTS["SECURITY_BUG"]:
                 msg_string += '<td><a class="secreview" onclick="open_issue(\''+key+'\',\''+status+'\',\''+summary+'\',\''+requestingfor+'\')" href="#"><button type="button" class="btn btn-primary pull-right">Close Bug</button></a></td></tr>'
                 # msg_string += '<td><a href="'+JIRA_URL+'/browse/'+key+'" target="_blank"><button type="button" class="btn btn-primary pull-right"> open ticket </button></a></td></tr>'
                 secbugs_string += msg_string
@@ -88,8 +98,11 @@ def get_open_secreviews(jira,JIRA_PROJECT,JIRA_URL):
 
 
 
-def resolve_or_close_jira(jira,JIRA_TRANSITIONS,key,comments,action,approver=None):
+def resolve_or_close_jira(jira,JIRA_TRANSITIONS,key,comments,action=None,approver=None):
     
+    if not action:
+        return None
+
     if action == "Approve":
         transaction_id = JIRA_TRANSITIONS['APPROVE_TRANS']
         fields = {'resolution':{'name': 'Done'}}
