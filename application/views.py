@@ -13,16 +13,17 @@ sys.setdefaultencoding('utf8')
 
 app.config.from_object(__name__)
 
-jira_settings = app.config['JIRA_SETTINGS']
+JIRA_SETTINGS = app.config['JIRA_SETTINGS']
 
-JIRA_URL = jira_settings['JIRA_URL']
-JIRA_USER = jira_settings['JIRA_USER']
-JIRA_PASS = jira_settings['JIRA_PASS']
-JIRA_PROJECT = jira_settings['JIRA_PROJECT']
+JIRA_URL = JIRA_SETTINGS['JIRA_URL']
+JIRA_USER = JIRA_SETTINGS['JIRA_USER']
+JIRA_PASS = JIRA_SETTINGS['JIRA_PASS']
+JIRA_PROJECT = JIRA_SETTINGS['JIRA_PROJECT']
 
 peer_review_enabled = app.config['PEER_REVIEW_ENABLED']
-JIRA_TRANSITIONS = jira_settings['JIRA_TRANSITIONS'][peer_review_enabled]
+JIRA_TRANSITIONS = JIRA_SETTINGS['JIRA_TRANSITIONS'][peer_review_enabled]
 PEER_REVIEW_REQUIRED_FOR = app.config['PEER_REVIEW_REQUIRED_FOR']
+JIRA_COMPONENTS = JIRA_SETTINGS['JIRA_COMPONENTS']
 
 jira = JIRA(JIRA_URL, basic_auth=(JIRA_USER,JIRA_PASS))
 
@@ -75,9 +76,9 @@ def create_secreview():
     if requestingfor not in ("others"):
         Product_Title = "["+requestingfor+"] "+args.get('Product_Title')
 
-    component = "Security Review"
+    component = JIRA_COMPONENTS["SECURITY_REVIEW"]
     if requestingfor == "sec_bug":
-        component = "Security Bug"
+        component = JIRA_COMPONENTS["SECURITY_BUG"]
         Product_Title = "["+requestingfor+"] "+args.get('Issue_Title')
 
 
@@ -95,7 +96,7 @@ def create_secreview():
 
     description = "*requestingfor* : "+requestingfor+"\n"+description
 
-    result = create_new_jira(jira,JIRA_PROJECT,JIRA_TRANSITIONS,Product_Title,description,component)
+    result = create_new_jira(jira,JIRA_SETTINGS,Product_Title,description,component,peer_review_enabled)
 
     if result.key:
         redirect_url = JIRA_URL+"/browse/"+result.key
@@ -117,7 +118,7 @@ def close_tickets():
         return render_template("index.html",message="You are not authorized",category="danger"), 403        
 
     if request.method == 'GET':
-        [secreview_string,secbugs_string] = get_open_secreviews(jira,JIRA_PROJECT,JIRA_URL)
+        [secreview_string,secbugs_string] = get_open_secreviews(jira,JIRA_SETTINGS)
         return render_template('close_tickets.html',
             peer_review_enabled = str(peer_review_enabled).lower(),
             PEER_REVIEW_REQUIRED_FOR = PEER_REVIEW_REQUIRED_FOR,

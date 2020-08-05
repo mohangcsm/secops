@@ -78,7 +78,11 @@ class Config(object):
                 "APPROVE_TRANS" : 141, # approve action
                 "CLOSED_TRANS" : 131 # close or reject action
             }
-        ]
+        ],
+        "JIRA_COMPONENTS" : {
+            "SECURITY_REVIEW" : "Security Review",
+            "SECURITY_BUG" : "Security Bug"
+        }
     }
     
     #-------allowed domains settings---------#    

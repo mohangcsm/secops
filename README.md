@@ -23,7 +23,7 @@ SECOPS Framework has below functional benifits over a common bug/issue tracking 
 
 #### Docker Installation
 ```
-$ git clone -b docker https://github.com/mohangcsm/secops.git
+$ git clone https://github.com/mohangcsm/secops.git
 $ cd secops
 ```
 Update the **config.py** file with required values as mentioned below section, then build and run docker with below commands. (change port mapping as defined in the config file)
