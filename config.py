@@ -45,7 +45,7 @@ class Config(object):
 
     #-------other settings---------#
     ALLOWED_DOMAINS = ['gmail.com']
-    SECURITY_EMAIL = ['mohan.gcsm@gmail.com']
+    SECURITY_EMAIL = 'mohan.gcsm@gmail.com'
     APPSEC_USERS = ['mohan.gcsm@gmail.com']
     PEER_REVIEW_ENABLED = False
     PEER_REVIEW_REQUIRED_FOR = [
@@ -56,6 +56,15 @@ class Config(object):
         'existing_mobile_app',
         'existing_rest_api'
     ]
+    #-------other settings---------#
+
+
+    #-external page links settings-#
+    RFP_KB_Link = ''
+    SEC_KB_Link = ''
+
+    #-external page links settings-#
+
 
     #-------JIRA settings----------#
     JIRA_SETTINGS = {
@@ -86,6 +95,7 @@ class Config(object):
     }
     
     #-------allowed domains settings---------#    
+
 
 
 class ProductionConfig(Config):

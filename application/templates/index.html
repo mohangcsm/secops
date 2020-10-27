@@ -55,27 +55,25 @@
   </div>
 
 <h2><br />
-  {% if session.access_token %}
   <a href="/new_secreview"><button type="button" class="btn btn-grey btn-md" style="width:300px" data-toggle="modal" data-target="#myModal" id="new-scan" >
-    <strong>New security Review</strong>
+    <strong><strong><span class="glyphicon glyphicon-fire"></span> New security Review</strong>
   </button></a>
-  {% endif %}
     <button type="button" class="btn btn-grey btn-md dropdown dropdown-toggle line-spacing" style="width:300px" id="new-scan">
       <a class="dropdown-toggle" type="button" data-toggle="dropdown" style="color:white" >
       <span class="glyphicon glyphicon-th"></span>
         Knowledge Base
       <span class="caret"></span></a>
       <ul class="dropdown-menu" style="width:300px">
-        <li><a href="/security_base"><span class="glyphicon glyphicon-log-out"></span> Security Knowledge Base</a></li>
-        <li><a href="/rfp_base"><span class="glyphicon glyphicon-log-out"></span> RFP Knowledge Base</a></li>
+        <li><a href="{{config.SEC_KB_LINK|e}}" target="_blank"><span class="glyphicon glyphicon-book"></span> Security Knowledge Base</a></li>
+        <li><a href="{{config.RFP_KB_LINK|e}}" target="_blank"><span class="glyphicon glyphicon-book"></span> RFP Knowledge Base</a></li>
       </ul>
     </button>
   {% if session.appsec_user %}
   <a href="/close_tickets"><button type="button" class="btn btn-grey btn-md" style="width:300px" id="new-scan" >
-    <strong>Close Tickets</strong>
+    <strong><span class="glyphicon glyphicon-off"></span> Close Tickets</strong>
   </button></a>
   {% endif %}
-</h2>
+</h2><br />
 
     <!-- Footer -->
     {% extends "footer.html" %}

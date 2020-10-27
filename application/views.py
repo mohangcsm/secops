@@ -1,4 +1,4 @@
-import flask, time, sys, json, sqlite3, os, sys, random, string, hashlib, subprocess
+import flask, time, sys, json, sqlite3, os, sys, random, string, hashlib, subprocess, requests
 
 from flask import render_template, session, jsonify, request, Response, flash
 from flask import flash, current_app, redirect, url_for, send_from_directory
@@ -127,7 +127,7 @@ def close_tickets():
             message="",
             category=""), 200
 
-    if request.method == "POST" and  "action" in request.form:
+    if request.method == "POST" and  "Action" in request.form:
         args = request.form
         category="success"
         return_code = 200
@@ -138,7 +138,7 @@ def close_tickets():
         requestingfor = args.get('requestingfor')
         comments = args.get('comments')
         approver = args.get('approver')
-        action = args.get('action')
+        action = args.get('Action')
 
         status = check_status(str(issue.fields.status.name),requestingfor)
 
@@ -227,7 +227,6 @@ def close_tickets():
         return render_template('index.html',message=message, category=category), return_code
 
     return redirect(url_for('index')), 403
-        
 
 @app.route('/security_base')
 def security_base():

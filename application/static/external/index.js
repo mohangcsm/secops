@@ -184,7 +184,7 @@ function open_issue(key,status,summary,requestingfor){
   }
   var approve_action = document.createElement("INPUT");
   approve_action.type = "submit";
-  approve_action.name = "action";
+  approve_action.name = "Action";
   if(status == "Under Review" || !peer_review_needed)
     approve_action.value = "Approve";
   else
@@ -204,7 +204,7 @@ function open_issue(key,status,summary,requestingfor){
   var close_div = document.createElement("DIV");
   close_div.classList = "pull-right";
 
-  var action_div = document.getElementById('action');
+  var action_div = document.getElementById('Action');
   action_div.innerHTML = "";
 
   approve_div.appendChild(approve_action);
