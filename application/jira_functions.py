@@ -1,16 +1,15 @@
 
 
-def create_new_jira(jira,JIRA_SETTINGS,product_title="", description="",component="Security Review",peer_review_enabled=False):
+def create_new_jira(jira,JIRA_SETTINGS,product_title="", description="",jira_type="Task",peer_review_enabled=False):
     
     JIRA_PROJECT = JIRA_SETTINGS['JIRA_PROJECT']
-    JIRA_COMPONENTS = JIRA_SETTINGS['JIRA_COMPONENTS']
+    JIRA_ISSUE_TYPES = JIRA_SETTINGS['JIRA_ISSUE_TYPES']
     
     JIRA_TRANSITIONS = JIRA_SETTINGS['JIRA_TRANSITIONS'][peer_review_enabled]
     TODO_TRANS = JIRA_TRANSITIONS['TODO_TRANS']
 
-    task = "Task"
-    if component == JIRA_COMPONENTS["SECURITY_BUG"]:
-        task = "Bug"
+    if jira_type not in ['Task','Bug']:
+        jira_type = "Task"
 
     fields = {
         "project": {
@@ -19,16 +18,14 @@ def create_new_jira(jira,JIRA_SETTINGS,product_title="", description="",componen
         "summary": product_title,
         "description": description, 
         "issuetype": {
-            'name': task
-        },
-        "components":[{
-            'name': component
-        }]
+            'name': jira_type
+        }
     }
 
     try:
         result = jira.create_issue(fields = fields)
-        jira.transition_issue(result.key,TODO_TRANS)
+        key = result.key
+        jira.transition_issue(key,TODO_TRANS)
         return result
     
     except Exception, ae:
@@ -41,9 +38,9 @@ def get_open_secreviews(jira,JIRA_SETTINGS):
 
     JIRA_URL = JIRA_SETTINGS["JIRA_URL"]
     JIRA_PROJECT = JIRA_SETTINGS["JIRA_PROJECT"]
-    JIRA_COMPONENTS = JIRA_SETTINGS["JIRA_COMPONENTS"]
+    JIRA_ISSUE_TYPES = JIRA_SETTINGS["JIRA_ISSUE_TYPES"]
 
-    open_issues = jira.search_issues('component in ("'+JIRA_COMPONENTS["SECURITY_BUG"]+'","'+JIRA_COMPONENTS["SECURITY_REVIEW"]+'") AND status not in (Closed, Resolved, Done) AND project = "'+JIRA_PROJECT+'" ORDER BY created DESC')
+    open_issues = jira.search_issues('status not in (Closed, Resolved, Done) AND project = "'+JIRA_PROJECT+'" ORDER BY created DESC')
 
     secreview_string = ""
     secbugs_string = ""
@@ -81,19 +78,14 @@ def get_open_secreviews(jira,JIRA_SETTINGS):
         msg_string = '<tr><td align="center"><span class="'+icon+'"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-user" title="'+assignee+'"></span></td>'
         msg_string += '<td class="summary">'+key+' - <a href="'+JIRA_URL+'/browse/'+key+'" target="_blank">'+summary+'</a></td>'
         
-        components = open_issue.fields.components
-        for component in components:
-            if str(component.name) == JIRA_COMPONENTS["SECURITY_REVIEW"]:
-                msg_string += '<td><a class="secreview" onclick="open_issue(\''+key+'\',\''+status+'\',\''+summary+'\',\''+requestingfor+'\')" href="#"><button type="button" class="btn btn-primary pull-right">Close Ticket</button></a></td></tr>'
-                secreview_string += msg_string
-                break
-
-            if str(component.name) == JIRA_COMPONENTS["SECURITY_BUG"]:
-                msg_string += '<td><a class="secreview" onclick="open_issue(\''+key+'\',\''+status+'\',\''+summary+'\',\''+requestingfor+'\')" href="#"><button type="button" class="btn btn-primary pull-right">Close Bug</button></a></td></tr>'
-                # msg_string += '<td><a href="'+JIRA_URL+'/browse/'+key+'" target="_blank"><button type="button" class="btn btn-primary pull-right"> open ticket </button></a></td></tr>'
-                secbugs_string += msg_string
-                break
-        
+        jira_type = open_issue.fields.issuetype
+        if str(jira_type.name) == JIRA_ISSUE_TYPES["SECURITY_REVIEW"]:
+            msg_string += '<td><a class="secreview" onclick="open_issue(\''+key+'\',\''+status+'\',\''+summary+'\',\''+requestingfor+'\')" href="#"><button type="button" class="btn btn-primary pull-right">Close Ticket</button></a></td></tr>'
+            secreview_string += msg_string
+        else:
+            msg_string += '<td><a class="secreview" onclick="open_issue(\''+key+'\',\''+status+'\',\''+summary+'\',\''+requestingfor+'\')" href="#"><button type="button" class="btn btn-primary pull-right">Close Bug</button></a></td></tr>'
+            # msg_string += '<td><a href="'+JIRA_URL+'/browse/'+key+'" target="_blank"><button type="button" class="btn btn-primary pull-right"> open ticket </button></a></td></tr>'
+            secbugs_string += msg_string
     return [secreview_string,secbugs_string]
 
 
@@ -105,12 +97,14 @@ def resolve_or_close_jira(jira,JIRA_TRANSITIONS,key,comments,action=None,approve
 
     if action == "Approve":
         transaction_id = JIRA_TRANSITIONS['APPROVE_TRANS']
-        fields = {'resolution':{'name': 'Done'}}
+        # fields = {'resolution':{'name': 'Done'}}
+        fields = {}
 
 
     if action == "Reject":
         transaction_id = JIRA_TRANSITIONS['CLOSED_TRANS']
-        fields = {'resolution':{'name': 'Won\'t Do'}}
+        # fields = {'resolution':{'name': 'Won\'t Do'}}
+        fields = {}
 
     if action == "Send for Review":
         transaction_id = JIRA_TRANSITIONS['SEND_FOR_REVIEW_TRANS']

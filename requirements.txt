@@ -19,7 +19,6 @@ MarkupSafe==1.1.1
 oauth2==1.9.0.post1
 oauthlib==3.1.0
 pbr==5.4.5
-pprint==0.1
 pycparser==2.20
 PyJWT==1.7.1
 requests==2.24.0

@@ -76,22 +76,22 @@ class Config(object):
 
         "JIRA_TRANSITIONS" : [
             { # action ids with out peer review
-                "TODO_TRANS" : 711, # move to To do from backlog action
+                "TODO_TRANS" : 41, # move to To do from backlog action
                 "SEND_FOR_REVIEW_TRANS" : None, # This should always be none
-                "APPROVE_TRANS" : 5, #Resolve action
-                "CLOSED_TRANS" : 2 # close or reject action,
+                "APPROVE_TRANS" : 11, # approve action
+                "CLOSED_TRANS" : 61 # close or reject action
             },
             { # action ids with peer review
-                "TODO_TRANS" : 51, # move to To do from backlog action
+                "TODO_TRANS" : 711, # move to To do from backlog action
                 "SEND_FOR_REVIEW_TRANS" : 151, # Send for review action
-                "APPROVE_TRANS" : 141, # approve action
-                "CLOSED_TRANS" : 131 # close or reject action
+                "APPROVE_TRANS" : 5, #Resolve action
+                "CLOSED_TRANS" : 2 # close or reject action,
             }
         ],
-        "JIRA_COMPONENTS" : {
-            "SECURITY_REVIEW" : "Security Review",
-            "SECURITY_BUG" : "Security Bug"
-        }
+        "JIRA_ISSUE_TYPES" : {
+            "SECURITY_REVIEW" : "Task",
+            "SECURITY_BUG" : "Bug"
+        },
     }
     
     #-------allowed domains settings---------#    

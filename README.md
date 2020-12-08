@@ -41,7 +41,7 @@ $ docker run --rm -d -p 80:80 secops
 #####
 - Update JIRA Project Configuration to integrate with SECOPS Framework
     - Create Workflow according to the requirement. Workflows required for 1-factor approval and 2-factor approval can be found in the `WORKFLOWS` folder
-    - Create 2 jira componants with names `Security Reviews` and `Security Bugs`
+
 #####
 ##### Enabling Peer Review & approval process
 - in **config.py** 

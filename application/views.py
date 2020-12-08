@@ -23,7 +23,9 @@ JIRA_PROJECT = JIRA_SETTINGS['JIRA_PROJECT']
 peer_review_enabled = app.config['PEER_REVIEW_ENABLED']
 JIRA_TRANSITIONS = JIRA_SETTINGS['JIRA_TRANSITIONS'][peer_review_enabled]
 PEER_REVIEW_REQUIRED_FOR = app.config['PEER_REVIEW_REQUIRED_FOR']
-JIRA_COMPONENTS = JIRA_SETTINGS['JIRA_COMPONENTS']
+JIRA_ISSUE_TYPES = JIRA_SETTINGS['JIRA_ISSUE_TYPES']
+
+SECURITY_EMAIL = app.config['SECURITY_EMAIL']
 
 jira = JIRA(JIRA_URL, basic_auth=(JIRA_USER,JIRA_PASS))
 
@@ -76,9 +78,9 @@ def create_secreview():
     if requestingfor not in ("others"):
         Product_Title = "["+requestingfor+"] "+args.get('Product_Title')
 
-    component = JIRA_COMPONENTS["SECURITY_REVIEW"]
+    jira_type = JIRA_ISSUE_TYPES["SECURITY_REVIEW"]
     if requestingfor == "sec_bug":
-        component = JIRA_COMPONENTS["SECURITY_BUG"]
+        jira_type = JIRA_ISSUE_TYPES["SECURITY_BUG"]
         Product_Title = "["+requestingfor+"] "+args.get('Issue_Title')
 
 
@@ -96,16 +98,19 @@ def create_secreview():
 
     description = "*requestingfor* : "+requestingfor+"\n"+description
 
-    result = create_new_jira(jira,JIRA_SETTINGS,Product_Title,description,component,peer_review_enabled)
+    result = create_new_jira(jira,JIRA_SETTINGS,Product_Title,description,jira_type,peer_review_enabled)
 
-    if result.key:
-        redirect_url = JIRA_URL+"/browse/"+result.key
-        # return redirect(redirect_url), 302
-        return render_template("index.html",message="Ticket raised successfully: "+result.key+".<br /><br /><a href='"+redirect_url+"' target='_blank'>click here to view the ticket.</a>")
+    try:
+        if result.key:
+            redirect_url = JIRA_URL+"/browse/"+result.key
+            # return redirect(redirect_url), 302
+            return render_template("index.html",message="Ticket raised successfully: "+result.key+".<br /><br /><a href='"+redirect_url+"' target='_blank'>click here to view the ticket.</a>")
+    except Exception, ae:
+        print ae
+        pass
 
     return render_template('new_secreview.html',
-        message="JiraError: "+str(result)+"<br />Please contact @mohan.kk",
-        category="warning"), 200
+        message="JiraError: "+str(result)+"<br />Please contact "+SECURITY_EMAIL,category="warning"), 200
 
 @app.route('/close_tickets', methods=['GET','POST'])
 def close_tickets():
@@ -185,6 +190,12 @@ def close_tickets():
 
             checks_message += "{code}"
 
+            if status == "To Do":
+                message = "Start progress first to approe a ticket"
+                category = "warning"
+                return_code = 401
+                return render_template('index.html',message=message, category=category), return_code
+
             if action == "Approve":
                 message = "Ticket Approved successfully"
                 approve_message = "This is good to go from appsec side. The following checks have been verified."
@@ -205,6 +216,12 @@ def close_tickets():
             comment_message = approve_message+checks_message+"\n"+comment_message+signing_message
 
         if action == "Reject":
+            if status != "To Do":
+                message = "Stop progress first to reject a ticket"
+                category = "warning"
+                return_code = 401
+                return render_template('index.html',message=message, category=category), return_code 
+
             if not comments or comments == "":
                 message = "Manadatory parameters 'comments' is missing. Please check and retry"
                 category = "warning"
@@ -279,7 +296,7 @@ with app.test_request_context('/'):
 
 with app.test_request_context('/'):
     def check_status(status,requestingfor):
-        if requestingfor != 'sec_bug' and status in ("Backlog","To Do", "ToStart"):
+        if requestingfor != 'sec_bug' and status in ("Backlog", "To Do", "ToStart"):
             return None
         return status
 
