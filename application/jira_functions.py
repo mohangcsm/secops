@@ -132,7 +132,7 @@ def get_open_tickets(jira,JIRA_SETTINGS):
     JIRA_COMPONENTS = JIRA_SETTINGS["JIRA_COMPONENTS"]
     JIRA_FILTERS = JIRA_SETTINGS["JIRA_FILTERS"]
 
-    open_issues = jira.search_issues('filter='+str(JIRA_FILTERS['Open_Tickets']), maxResults=1000)
+    open_issues = jira.search_issues('filter='+str(JIRA_FILTERS['open_tickets']), maxResults=1000)
 
     return get_jira_issue_strings(open_issues, JIRA_SETTINGS);
 

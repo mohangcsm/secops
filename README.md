@@ -1,4 +1,4 @@
-[![Github Release Version](https://img.shields.io/badge/release-V1.0-blue.svg)](https://github.com/mohangcsm/secops)
+[![Github Release Version](https://img.shields.io/badge/release-V1.1-blue.svg)](https://github.com/mohangcsm/secops)
 [![Python Version](https://img.shields.io/badge/python-2.7-blue.svg)](https://github.com/mohangcsm/secops)
 
 # SECOPS Framework for Centralised Product Security Operations.
@@ -38,10 +38,12 @@ $ docker run -p80:80 -v $(pwd):/app -d secops
     - edit the port of the app (Default: 80)
     - update the `JIRA_SETTINGS` with jira url and credentials. use jira access token instead of password
     - update the `JIRA_TRANSTIONS` according to 1factor workflow
+    - update `external page links settings` as required.
 #####
 - Update JIRA Project Configuration to integrate with SECOPS Framework
     - Create Workflow according to the requirement. Workflows required for 1-factor approval and 2-factor approval can be found in the `WORKFLOWS` folder
     - Create 2 jira componants with names `Security Reviews` and `Security Bugs`
+    - create `JIRA filters` (with exact names) as mentioned in JIRA_SETTINGS
 #####
 ##### Enabling Peer Review & approval process
 - in **config.py** 
@@ -155,6 +157,28 @@ $ docker run -p80:80 -v $(pwd):/app -d secops
 
 #### Core Softwares :
     - Python 2.7
+
+
+### Changelog
+~~~~
+v1.1
+ - Security Metrics added with multiple dashboards.
+ - Option for adding Security Policies and guidelines added in menu.
+ - Security Code review UI controls added.
+
+v1.0
+ - Unified Security review creation and Security Bug creation features added.
+ - JSON based customisation for UI controls added.
+ - Peer approval process added as a flag from configuration.
+ - Auditing capabilities through JIRA workflow history.
+~~~~
+
+### Roadmap
+~~~~
+ - Executive summary mailer for Security Metrics.
+ - UI based followup controls for security reviews and security bugs.
+ - API Integration with DAST, SAST and FOSS tools.
+~~~~
 
 ### Lead Developer
 - Mohan Kallepalli (@mohankallepalli) 
