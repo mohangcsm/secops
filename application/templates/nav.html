@@ -7,21 +7,30 @@
        <li><a href="/"><span class="glyphicon glyphicon-home"></span> Home</a></li>
       {% if session.access_token %}
         <li><a href="/new_secreview"><span class="glyphicon glyphicon-fire"></span> New security Review</a></li>
-      </button></a>
       {% endif %}
+      <li class="dropdown line-spacing">
+        <a class="dropdown-toggle" type="button" data-toggle="dropdown">
+        <span class="glyphicon glyphicon-th"></span> Confluence Links
+        <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a href="{{config.APPSEC_TEAM_LINK|e}}" target="_blank"><span class="glyphicon glyphicon-home"></span> Security Assurance Home</a></li>
+          <li><a href="{{config.SEC_KB_LINK|e}}" target="_blank"><span class="glyphicon glyphicon-book"></span> Security Knowledge Base</a></li>
+        </ul>
+      </li>
+      <li class="dropdown line-spacing">
+        <a class="dropdown-toggle" type="button" data-toggle="dropdown">
+        <span class="glyphicon glyphicon-th"></span> Security Policies
+        <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a href="{{config.INFOSEC_POLICY_LINK|e}}" target="_blank"><span class="glyphicon glyphicon-book"></span> Infosec Policy</a></li>
+          <li><a href="{{config.SEC_AWARENESS_LINK|e}}" target="_blank"><span class="glyphicon glyphicon-book"></span> Security Awareness Guidelines</a></li>
+          <li><a href="{{config.VRM_POLICY_LINK|e}}" target="_blank"><span class="glyphicon glyphicon-book"></span> VRM Policy</a></li>
+        </ul>
+      </li>
       {% if session.appsec_user %}
        <li><a href="/close_tickets"><span class="glyphicon glyphicon-off"></span> Close Tickets</a></li>
       {% endif %}
       <li class="dropdown line-spacing">
-        <a class="dropdown-toggle" type="button" data-toggle="dropdown">
-        <span class="glyphicon glyphicon-th"></span> Knowledge Base
-        <span class="caret"></span></a>
-        <ul class="dropdown-menu">
-          <li><a href="{{config.SEC_KB_LINK|e}}" target="_blank"><span class="glyphicon glyphicon-book"></span> Security KB</a></li>
-          <li><a href="{{config.RFP_KB_LINK|e}}" target="_blank"><span class="glyphicon glyphicon-book"></span> RFP KB</a></li>
-        </ul>
-      </li>
-       <li class="dropdown line-spacing">
           <a class="dropdown-toggle" type="button" data-toggle="dropdown">
           <span class="glyphicon glyphicon-user"></span> {% if session.get('email') %}
             {{ session.get('email').title() | e }}
