@@ -54,21 +54,25 @@ class Config(object):
         'new_rest_api',
         'existing_web_app',
         'existing_mobile_app',
-        'existing_rest_api'
+        'existing_rest_api',
+        'other'
     ]
     #-------other settings---------#
 
 
     #-external page links settings-#
-    RFP_KB_Link = ''
-    SEC_KB_Link = ''
-
+    SEC_KB_LINK = "<>"
+    APPSEC_TEAM_LINK = "<>"
+    VRM_POLICY_LINK = "<>"
+    SEC_AWARENESS_LINK = "<>"
+    INFOSEC_POLICY_LINK = "<>"
+    
     #-external page links settings-#
 
 
     #-------JIRA settings----------#
     JIRA_SETTINGS = {
-    
+
         "JIRA_URL" : "<JIRA URL>",
         "JIRA_USER" : "<JIRA USERNAME>",
         "JIRA_PASS" : "<JIRA TOKEN not PASSWORD>",
@@ -76,24 +80,81 @@ class Config(object):
 
         "JIRA_TRANSITIONS" : [
             { # action ids with out peer review
-                "TODO_TRANS" : 711, # move to To do from backlog action
+                "TODO_TRANS" : 21, # move to To do from backlog action
                 "SEND_FOR_REVIEW_TRANS" : None, # This should always be none
                 "APPROVE_TRANS" : 5, #Resolve action
-                "CLOSED_TRANS" : 2 # close or reject action,
+                "CLOSED_TRANS" : 101 # close or reject action,
             },
             { # action ids with peer review
                 "TODO_TRANS" : 51, # move to To do from backlog action
-                "SEND_FOR_REVIEW_TRANS" : 151, # Send for review action
-                "APPROVE_TRANS" : 141, # approve action
-                "CLOSED_TRANS" : 131 # close or reject action
+                "SEND_FOR_REVIEW_TRANS" : 51, # Send for review action
+                "REJECT_APPROVAL" : 61, # reject review action
+                "APPROVE_TRANS" : 71, # approve action
+                "CLOSED_TRANS" : 101 # close or reject action
+               
             }
         ],
         "JIRA_COMPONENTS" : {
             "SECURITY_REVIEW" : "Security Review",
             "SECURITY_BUG" : "Security Bug"
+        },
+
+        "JIRA_FILTERS" : {
+            "open_secreviews" : 10000,
+            "open_secbugs" : 10001,
+            "open_secreviews_2_weeks" : 10002,
+            "open_secreviews_by_me" : 10003,
+            "open_tickets" : 10006,
+            "total_secreviews" : 10004,
+            "total_secbugs" : 10005,
+            "total_secreviews_2_weeks" : 10007
+        },
+
+        "STATUS_N_SEVERITY" : {
+            "by_status" : ["Done", "Deployed", "Resolved", "Closed", "In Progress", "Under Review", "Waiting for customer", "To Do", "Open", "Reopened"],
+            "by_severity" : ["Highest", "High", "Medium", "Low", "Lowest"]
+        },
+
+        "STATUS_CODES" : {
+            "Done":"green", 
+            "Deployed":"green", 
+            "Resolved":"green", 
+            "Closed" : "green",
+            "In Progress":"blue", 
+            "Verification":"orange", 
+            "Under Review":"orange", 
+            "Waiting for customer":"gray", 
+            "To Do":"red", 
+            "Open":"red", 
+            "Reopened":"red",
+
+            "Lowest":"green", 
+            "Low":"lime", 
+            "Medium":"orange", 
+            "High":"red", 
+            "Highest":"red"
+        },
+
+        "COLOR_CODES" : {
+            "BACKGROUND" : {
+                "red" : 'rgba(255, 99, 132, 0.2)',
+                "green" : 'rgba(180, 206, 32, 0.2)',
+                "blue" : 'rgba(54, 162, 235, 0.2)',
+                "orange" : 'rgba(255, 94, 0, 0.2)',
+                "gray" : 'rgba(85, 85, 85, 0.2)',
+                "lime" : 'rgba(0, 200, 225, 0.2)'
+            },
+            "BORDER" : {
+                "red" : 'rgba(255, 99, 132, 1)',
+                "green" : 'rgba(180, 206, 32, 1)',
+                "blue" : 'rgba(54, 162, 235, 1)',
+                "orange" : 'rgba(255, 94, 0, 1)',
+                "gray" : 'rgba(85, 85, 85, 1)',
+                "lime" : 'rgba(0, 200, 225, 1)'
+            }
         }
     }
-    
+
     #-------allowed domains settings---------#    
 
 

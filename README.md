@@ -29,7 +29,7 @@ $ cd secops
 Update the **config.py** file with required values as mentioned below section, then build and run docker with below commands. (change port mapping as defined in the config file)
 ```
 $ docker build --rm -t secops .
-$ docker run --rm -d -p 80:80 secops
+$ docker run -p80:80 -v $(pwd):/app -d secops
 ```
 
 ##### Things to do before running: 
@@ -156,7 +156,8 @@ $ docker run --rm -d -p 80:80 secops
 - Mohan Kallepalli (@mohankallepalli) 
 
 ### Credits
-- MoEngage Security Team
+- Myntra Security Team
+- Moengage Security Team
 
 ##### License: Apache 2.0
 ~~~~
