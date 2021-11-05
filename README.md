@@ -1,3 +1,5 @@
+[![Github Release Version](https://img.shields.io/badge/release-V1.0-blue.svg)](https://github.com/mohangcsm/secops)
+[![Python Version](https://img.shields.io/badge/python-2.7-blue.svg)](https://github.com/mohangcsm/secops)
 
 # SECOPS Framework for Centralised Product Security Operations.
 
@@ -13,12 +15,22 @@ SECOPS Framework has below functional benifits over a common bug/issue tracking 
 - `git clone https://github.com/mohangcsm/secops.git` or download the zip
 - `pip install -r requirements.txt`
 
-
 #### Running SECOPS:
 - run `python run.py` to launch server
 
 - SECOPS server can be accessed from http://server_ip or https://server_ip
 
+
+#### Docker Installation
+```
+$ git clone https://github.com/mohangcsm/secops.git
+$ cd secops
+```
+Update the **config.py** file with required values as mentioned below section, then build and run docker with below commands. (change port mapping as defined in the config file)
+```
+$ docker build --rm -t secops .
+$ docker run -p80:80 -v $(pwd):/app -d secops
+```
 
 ##### Things to do before running: 
 - in **config.py**
@@ -43,6 +55,60 @@ SECOPS Framework has below functional benifits over a common bug/issue tracking 
 - update the Domain settings in `config.py` file (HTTPS port, certificate path, key file path etc)
 - uncomment the `HTTPS` section in `run.py` file and make sure to comment out the `HTTP` section.
 #####
+
+#### Adding New type of Security Requests
+
+- Edit the **application/static/request_options.json** json to add/modify new secreview options
+
+    - First update the `base_options` section to update the dropdown list
+        - to add a new entry into dropdown add the respective **KEY:VALUE** data into JSON object
+        
+        For example, to add **new type of review** category under **Others** section, use below
+    ```
+        "Others" : {
+            "PRD Document Review" : "prd_review",
+            "Architecture Review" : "arch_review",
+            "Security Bug" : "sec_bug",
+            "Others" : "others",
+            "new type of review" : "new_type_of_review"
+        }
+    ```
+    - Now add HTML entities into `request_options` section to show the relevent form when the option is selected
+        - **label** : Any label you want to show before the input element. Update this as needed
+        - **name** : This will be the parameter name with which the input will be posted to server
+        - **innerHtml** : prefill data comes here. leave empty string here if prefilling is not needed
+        - **placeholder** : placeholder to be shown for input text element
+        - **elementType** : type of html element. must be one of `input/textarea`
+        - **type** : ignore if elementType is **textarea**. if elementType is **input**  this must be one of `text/file/date`
+    
+        For example, to add a textarea under `new_type_of_review` form, add as below
+    ```
+        "new_type_of_review" : [
+            {
+                "label" : "Enter Name here",
+                "name" : "name",
+                "innerHtml" : "",
+                "elementType" : "textarea"
+            }
+        ]
+    ```
+    - Similarly, update the JSON file with as many HTML elements as required. 
+    - Validate the JSON format before closing the file.
+    
+#### Adding New Closing options for Security Reviews
+
+- Edit the **application/static/options.json** json to add/modify closing options for secreviews
+
+    For example, to add new closing option **Business Logic Validated** to `sec_bug` options, use as below.
+    ```
+    "sec_bug" : {
+        "Fix Verified Dynamically" : "fix_verified",
+        "Code Review Done" : "code_verified",
+        "Business Logic Validated" : "bus_logic_valid"
+    },
+    ```
+- In this newly added **KEY:VALUE** pair, value such as bus_logic_valid is **optional** and can be anything
+- Validate the JSON format before closing the file.
 ##### TROUBLESHOOTS :
 
 - READ FIRST : About Python 2 and 3 compatibility
@@ -72,6 +138,9 @@ SECOPS Framework has below functional benifits over a common bug/issue tracking 
 
 ![Secreview Options](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/4.png)
 
+![Code Review](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/4-1.png)
+
+
 #### Closing Reviews and Bugs
 
 ![Close Tickets page](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/5.png)
@@ -90,7 +159,8 @@ SECOPS Framework has below functional benifits over a common bug/issue tracking 
 - Mohan Kallepalli (@mohankallepalli) 
 
 ### Credits
-- MoEngage Security Team
+- Myntra Security Team
+- Moengage Security Team
 
 ##### License: Apache 2.0
 ~~~~
