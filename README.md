@@ -138,6 +138,10 @@ $ docker run -p80:80 -v $(pwd):/app -d secops
 
 ![Secreview Options](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/4.png)
 
+![Code Review](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/4-1.png)
+
+![Secreview Options](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/4.png)
+
 #### Closing Reviews and Bugs
 
 ![Close Tickets page](https://github.com/mohangcsm/secops/raw/devdocs/screenshot/5.png)
