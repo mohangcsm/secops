@@ -1,4 +1,4 @@
-import flask, time, sys, json, sqlite3, os, sys, random, string, hashlib, subprocess
+import flask, time, sys, json, sqlite3, os, sys, random, string, hashlib, subprocess, requests
 
 from flask import render_template, session, jsonify, request, Response, flash
 from flask import flash, current_app, redirect, url_for, send_from_directory
@@ -11,20 +11,29 @@ from jira_functions import *
 reload(sys)
 sys.setdefaultencoding('utf8')
 
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+
 app.config.from_object(__name__)
 
-jira_settings = app.config['JIRA_SETTINGS']
+JIRA_SETTINGS = app.config['JIRA_SETTINGS']
 
-JIRA_URL = jira_settings['JIRA_URL']
-JIRA_USER = jira_settings['JIRA_USER']
-JIRA_PASS = jira_settings['JIRA_PASS']
-JIRA_PROJECT = jira_settings['JIRA_PROJECT']
+JIRA_URL = JIRA_SETTINGS['JIRA_URL']
+JIRA_USER = JIRA_SETTINGS['JIRA_USER']
+JIRA_PASS = JIRA_SETTINGS['JIRA_PASS']
+JIRA_PROJECT = JIRA_SETTINGS['JIRA_PROJECT']
 
 peer_review_enabled = app.config['PEER_REVIEW_ENABLED']
-JIRA_TRANSITIONS = jira_settings['JIRA_TRANSITIONS'][peer_review_enabled]
+JIRA_TRANSITIONS = JIRA_SETTINGS['JIRA_TRANSITIONS'][peer_review_enabled]
 PEER_REVIEW_REQUIRED_FOR = app.config['PEER_REVIEW_REQUIRED_FOR']
+JIRA_COMPONENTS = JIRA_SETTINGS['JIRA_COMPONENTS']
+JIRA_FILTERS = JIRA_SETTINGS["JIRA_FILTERS"]
+JIRA_OPTIONS = {'server': JIRA_URL,'verify':False}
 
-jira = JIRA(JIRA_URL, basic_auth=(JIRA_USER,JIRA_PASS))
+app.config['JIRA_URL'] = JIRA_URL
+
+jira = JIRA(JIRA_OPTIONS, basic_auth=(JIRA_USER,JIRA_PASS))
 
 oauth = OAuth()
 google = oauth.remote_app(
@@ -40,6 +49,7 @@ google = oauth.remote_app(
     consumer_secret=app.config['GOOGLE_CLIENT_SECRET']
 )
 
+
 @app.route('/', methods=['GET'])
 def index():
     if not session.get('access_token'):
@@ -52,7 +62,6 @@ def new_secreview():
     access_token = session.get('access_token')
     if access_token is None:
         return render_template("login.html",message="Please login to continue",category="info"), 403
-
 
     return render_template('new_secreview.html',message="",category=""), 200   
 
@@ -75,9 +84,9 @@ def create_secreview():
     if requestingfor not in ("others"):
         Product_Title = "["+requestingfor+"] "+args.get('Product_Title')
 
-    component = "Security Review"
+    component = JIRA_COMPONENTS["SECURITY_REVIEW"]
     if requestingfor == "sec_bug":
-        component = "Security Bug"
+        component = JIRA_COMPONENTS["SECURITY_BUG"]
         Product_Title = "["+requestingfor+"] "+args.get('Issue_Title')
 
 
@@ -95,7 +104,7 @@ def create_secreview():
 
     description = "*requestingfor* : "+requestingfor+"\n"+description
 
-    result = create_new_jira(jira,JIRA_PROJECT,JIRA_TRANSITIONS,Product_Title,description,component)
+    result = create_new_jira(jira,JIRA_SETTINGS,Product_Title,description,component,peer_review_enabled)
 
     if result.key:
         redirect_url = JIRA_URL+"/browse/"+result.key
@@ -117,7 +126,7 @@ def close_tickets():
         return render_template("index.html",message="You are not authorized",category="danger"), 403        
 
     if request.method == 'GET':
-        [secreview_string,secbugs_string] = get_open_secreviews(jira,JIRA_PROJECT,JIRA_URL)
+        [secreview_string,secbugs_string] = get_open_tickets(jira,JIRA_SETTINGS)
         return render_template('close_tickets.html',
             peer_review_enabled = str(peer_review_enabled).lower(),
             PEER_REVIEW_REQUIRED_FOR = PEER_REVIEW_REQUIRED_FOR,
@@ -126,7 +135,7 @@ def close_tickets():
             message="",
             category=""), 200
 
-    if request.method == "POST" and  "action" in request.form:
+    if request.method == "POST" and  "Action" in request.form:
         args = request.form
         category="success"
         return_code = 200
@@ -137,7 +146,7 @@ def close_tickets():
         requestingfor = args.get('requestingfor')
         comments = args.get('comments')
         approver = args.get('approver')
-        action = args.get('action')
+        action = args.get('Action')
 
         status = check_status(str(issue.fields.status.name),requestingfor)
 
@@ -186,12 +195,12 @@ def close_tickets():
 
             if action == "Approve":
                 message = "Ticket Approved successfully"
-                approve_message = "This is good to go from appsec side. The following checks have been verified."
-                signing_message = "\nReview Approved by : @["+session['email']+"]"
+                approve_message = "This is *good to go* from Security side. The following checks have been verified."
+                signing_message = "\nReview Approved by : [~"+session['email']+"]"
             else:
                 message = "Ticket sent for approver review"
                 approve_message = "Initial review Completed. The following checks have been performed as part of the review."
-                signing_message = "\nInitial Review Completed by : @["+session['email']+"]"
+                signing_message = "\nInitial Review Completed by : [~"+session['email']+"]"
 
                 if approver == "":
                     message = "Manadatory parameters 'approver' is missing. Please check and retry"
@@ -211,11 +220,11 @@ def close_tickets():
                 return render_template('index.html',message=message, category=category), return_code 
 
             message = "Ticket Rejected successfully"
-            reject_message = "For mote information pelase reach out to "+app.config['SECURITY_EMAIL']+" with review ID in subject line."
+            reject_message = "For more information pelase reach out to "+app.config['SECURITY_EMAIL']+" with review ID in subject line."
             comment_message = comment_message+"\n"+reject_message
 
 
-        result = resolve_or_close_jira(jira,JIRA_TRANSITIONS,ticket_id,comment_message,action,approver)
+        result = resolve_or_close_jira(jira,JIRA_TRANSITIONS,status,ticket_id,comment_message,action,approver)
 
         if not result:
             message = "Error occured. Please try again after checking Jira state"
@@ -226,7 +235,27 @@ def close_tickets():
         return render_template('index.html',message=message, category=category), return_code
 
     return redirect(url_for('index')), 403
-        
+
+
+@app.route('/get_tickets/<jira_filter>')
+def get_tickets(jira_filter='-1'):
+    args = request.args
+    reporter = args.get('reporter')
+    if reporter == 'me':
+        reporter = session.get('email')
+
+    assignee = args.get('assignee')
+    if assignee == "me":
+        assignee = session.get('email')
+
+    since = args.get('since')
+    
+    return get_jira_issues(jira, JIRA_SETTINGS, JIRA_FILTERS[str(jira_filter).lower()], assignee, reporter, session.get('email'), since)
+
+@app.route('/ticket_states')
+@app.route('/ticket_states/')
+def ticket_statuses():
+    return get_jira_states(JIRA_SETTINGS)
 
 @app.route('/security_base')
 def security_base():
@@ -279,8 +308,8 @@ with app.test_request_context('/'):
 
 with app.test_request_context('/'):
     def check_status(status,requestingfor):
-        if requestingfor != 'sec_bug' and status in ("Backlog","To Do", "ToStart"):
-            return None
+        # if requestingfor != 'sec_bug' and status in ("Backlog","To Do", "ToStart"):
+        #     return None
         return status
 
 

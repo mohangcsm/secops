@@ -1,7 +1,7 @@
 {
     "base_options" : {
         "New Infosec Request" : {
-            "Client RFP" : "client_rfp"
+            "Client VRM" : "client_vrm"
         },
         "New Application" :   {
             "Web App" : "new_web_app",
@@ -14,21 +14,22 @@
             "Rest Api's" : "existing_rest_api"
         },
         "Infra Request" :   {
-            "New AMI Testing" : "new_ami",
+            "New Golder Image Testing" : "new_image",
             "New DataStore" : "new_datastore",
             "Security Group Modification" : "sg_request",
             "Port Opening/Modification" : "sg_request",
-            "Whitelisting" : "whitelisting"
+            "IP Whitelisting" : "ip_whitelisting"
         },
         "Others" : {
             "PRD Document Review" : "prd_review",
             "Architecture Review" : "arch_review",
             "Security Bug" : "sec_bug",
+            "Security Code Scan" : "code_scan",
             "Others" : "others"
         }
     },
     "request_options" : {
-        "client_rfp" : [
+        "client_vrm" : [
             {
                 "label" : "Client Information",
                 "type" : "text",
@@ -44,7 +45,7 @@
             {
                 "label" : "Please add contact details here",
                 "name" : "Owners",
-                "innerHtml" : "Sales POC Name: \nDev POC Name: \n",
+                "innerHtml" : "Sales/Marketing POC Name: \nDev POC Name: \n",
                 "elementType" : "textarea"
             },
             {
@@ -417,7 +418,7 @@
                 "elementType" : "input"
             }
         ],
-        "new_ami" : [
+        "new_image" : [
             {
                 "label" : "Enter Application/Service details below",
                 "type" : "text",
@@ -498,7 +499,7 @@
                 "elementType" : "textarea"
             }
         ],
-        "whitelisting" : [
+        "ip_whitelisting" : [
             {
                 "label" : "Enter Application/Service details below",
                 "type" : "text",
@@ -621,10 +622,38 @@
                 "elementType" : "textarea"
             },
             {
+                "label" : "Impact of the Issue",
+                "name" : "Impact",
+                "innerHtml" : "\n",
+                "elementType" : "textarea"
+            },
+            {
                 "label" : "Fix Recommendation",
                 "name" : "Recommendation",
                 "innerHtml" : "",
                 "elementType" : "textarea"
+            }
+        ],
+        "code_scan" : [
+            {
+                "label" : "Project Name",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Project Title",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Bitbucket Repository Link",
+                "type" : "text",
+                "name" : "Repo_link",
+                "placeholder" : "https://github.com/mohangcsm/secops.git",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Bitbucket Repository Branch Name",
+                "name" : "Repo_branch",
+                "placeholder" : "master",
+                "elementType" : "input"
             }
         ]
 

@@ -162,9 +162,10 @@ function requestingfor() {
 
   }
 
-
-
 function open_issue(key,status,summary,requestingfor){
+  if(status == "To Do" || status == "Waiting for customer")
+    alert("Ticket can not be Approved. Only Reject action allowed with JIRA status# "+status);
+ 
   if(requestingfor == "")
     requestingfor = "sec_bug";
 
@@ -184,8 +185,9 @@ function open_issue(key,status,summary,requestingfor){
   }
   var approve_action = document.createElement("INPUT");
   approve_action.type = "submit";
-  approve_action.name = "action";
-  if(status == "Under Review" || !peer_review_needed)
+  approve_action.name = "Action";
+  // console.log(key,status,summary,requestingfor);
+  if(status.toLowerCase() == "under review" || !peer_review_needed)
     approve_action.value = "Approve";
   else
     approve_action.value = "Send for Review";
@@ -204,7 +206,7 @@ function open_issue(key,status,summary,requestingfor){
   var close_div = document.createElement("DIV");
   close_div.classList = "pull-right";
 
-  var action_div = document.getElementById('action');
+  var action_div = document.getElementById('Action');
   action_div.innerHTML = "";
 
   approve_div.appendChild(approve_action);
@@ -262,3 +264,201 @@ function open_issue(key,status,summary,requestingfor){
   });
 }
 
+const all_statusses = {};
+const color_by_status = {};
+const colors = {};
+
+const myCharts = {};
+
+function draw_graph(graph_id,canvas_id,data,chartType,filter_type, title){
+  var statusses = all_statusses[filter_type];
+  filtered_data = data[filter_type];
+
+  var data_lengths = [];
+  var label_colors = [];
+  var border_color = [];
+  var total_count = 0;
+
+  var issue_statusses = statusses;
+
+  statusses.forEach(element => (function(){
+    if (!Object.keys(filtered_data).includes(element)){
+      issue_statusses = _.without(issue_statusses,element);
+    }
+    else{
+      data_lengths.push(filtered_data[element].length);
+      label_colors.push(colors['BACKGROUND'][color_by_status[element]]);
+      border_color.push(colors['BORDER'][color_by_status[element]]);
+
+      total_count += filtered_data[element].length;
+    }
+  })());
+
+  if (!(graph_id in myCharts))
+  {
+  }
+
+  myCharts[graph_id] = new Chart(canvas_id, {
+        type: chartType,
+        data: {
+            labels: issue_statusses,
+            datasets: [{
+                data: data_lengths,
+                backgroundColor: label_colors,
+                borderColor: border_color,
+                borderWidth: 1
+            }]
+        },
+        options: {
+          scales: {
+              y: {
+                  beginAtZero: true
+              }
+          },
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            title: {
+              display: true,
+              text: 'Application Security'
+            }
+          },
+          'onClick' : function (evt, item) {
+            $('#issuesLabel').html('Issues with <b class="state">"'+issue_statusses[item[0]['index']]+'"</b> state');
+            $('#issues_body').html('');
+            data[filter_type][issue_statusses[item[0]['index']]].forEach(setMsg);
+
+            function setMsg(item, index){
+              var JIRA_URL = $('#JIRA_URL').data("name");
+              var key = Object.keys(item)[0];
+              var value = item[key];
+              $('#issues_body').html($('#issues_body').html()+"<br /><a href='"+JIRA_URL+"browse/"+key+"'>"+key+' # '+value+"</a>");
+            }
+            $('#issues_btn').click();
+          }
+        }
+    });
+
+    myCharts[graph_id].config._config.options.plugins.title.text = title.toUpperCase()+" # "+total_count;
+    myCharts[graph_id].update();
+
+    // $('#'+graph_id+'_label').html($('#'+graph_id+'_label').html()+" # "+total_count);
+}
+
+function create_graph_for_url(issue_type, assignee, reporter, chartType='pie', filter_type='by_status',review_or_bug='secreviews',since=''){  
+  if (chartType == '')
+    chartType = 'pie';
+
+  if (review_or_bug == "")
+    review_or_bug = "secreviews";
+
+  var title = issue_type+" "+review_or_bug;
+  var url = issue_type+'_'+review_or_bug;
+  var graph_id = url;
+
+  url = url+"?";
+
+  if (assignee != "")
+  {
+    url = url+"&assignee="+assignee;
+    graph_id = graph_id+"_assigned_me";
+    title = title+" assigned to me";
+  }
+
+  if (reporter != "")
+  {
+    url = url+"&reporter="+reporter;
+    graph_id = graph_id+"_by_me";
+    title = title+" reported by me";
+  }
+
+  if (since != "")
+  {
+    url = url+"&since=-14d";
+    graph_id = graph_id+"_2_weeks";
+    title = title+" in 2 weeks";
+  }
+
+  if(review_or_bug != "")
+    url = url+"&review_or_bug="+review_or_bug;
+
+  graph_id = graph_id+"_"+filter_type;
+
+  var graphs = document.getElementById('graphs');
+  var childs = graphs.children;
+
+  if(childs.length == 0 || childs[childs.length-1].children.length/3 == 0 )
+  {
+    var iDiv = document.createElement('div');
+    iDiv.className = "row dashboard text-center";
+    iDiv.style = "width: 100%";
+    graphs.appendChild(iDiv);
+    childs = graphs.children;
+  }
+
+  child = childs[childs.length-1];
+
+  var childDiv = document.createElement('div');
+  childDiv.className = "pad border x400x";
+  childDiv.style = "width: 25%; display: inline-block;";
+
+  var canvas = document.createElement('canvas');
+  canvas.id = graph_id;
+  canvas.style.width = 100;
+  canvas.style.height = 100;
+
+  childDiv.appendChild(canvas);
+  child.appendChild(childDiv);
+
+  $.ajax({
+    'async': false,
+    'global': false,
+    'url': "/get_tickets/"+url,
+    'dataType': "json",
+    'beforeSend': function() {
+      $(".loader").show();
+      showLoader();
+    },
+    'success': function(data) {
+      var canvas = document.getElementById(graph_id);
+      const ctx = canvas.getContext('2d');
+      draw_graph(graph_id,ctx,data,chartType,filter_type, title);
+    },
+    'complete': function(data){
+      $(".loader").hide();
+      hideLoader();
+    }
+  });
+}
+
+function showLoader() {
+    $("#loader").css("display", "");
+}
+
+function hideLoader() {
+    setTimeout(function () {
+        $("#loader").css("display", "none");
+    }, 1000);
+}
+
+$.ajax({
+  'async': false,
+  'global': false,
+  'url': "/ticket_states/",
+  'dataType': "json",
+  'success': function(data) {
+    all_statusses['by_status'] = data['by_status'];
+    all_statusses['by_severity'] = data['by_severity'];
+    colors['BACKGROUND'] = data.COLOR_CODES['BACKGROUND'];
+    colors['BORDER'] = data.COLOR_CODES['BORDER'];
+    
+    Object.keys(data['STATUS_CODES']).forEach(element => (function(){
+      color_by_status[element] = data['STATUS_CODES'][element];
+    })());
+
+    // console.log(all_statusses);
+  }
+});

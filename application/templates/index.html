@@ -12,8 +12,10 @@
   <script src="/static/external/bootstrap.min.js"></script>
   <link href='/static/css/style.css' rel='stylesheet' type='text/css'> 
   <script src='/static/external/index.js'></script>
+  <script src='https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js'></script>
+  <script src='https://cdn.jsdelivr.net/npm/underscore@1.13.1/underscore-umd-min.js'></script>
 
-
+  <meta id="JIRA_URL" data-name='{{config.JIRA_URL|safe}}'>">
 
 </head>
 <body>
@@ -23,62 +25,191 @@
 <br /><br />
 <div>
 <div class="container-fluid">
+  <div class="row center">
+    <div class="container col-12" id="message" align="center">
+      {% if message %}
+          <div class="alert alert-{{ category }}" role="alert" style="width: 50%">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        {{ message | safe }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="row col-12 text-center h1">
+    <H1>Security Metrics Dashboard</H1>
+  </div>
+  <div class="row col-lg-12 center" >
+    <label for="dashboard" class="h4">Choose a dashboard: </label>
+    <select class="dropdown btn-lg btn-outline" name="dashboard" id="dashboard" onchange="show_dashboard(this.value)">
+      <option disabled selected="">Select Dashboard</option>
+      <option value="All Issues">All Issues</option>
+      <option value="Jiras in 2 Weeks">Jiras in 2 Weeks</option>
+      <option value="By Severity">By Severity</option>
+      <option value="My Metrics">My Metrics</option>
+      <option value="Open Tickets in 2 Weeks">Open Tickets in 2 Weeks</option>
+    </select>
+  </div>
+  <div class="row pad-bottom" id="graphs">
+  </div>
+<button type="button" class="btn btn-primary hidden" id="issues_btn" data-toggle="modal" data-target="#issuesModal">
+  ...
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="issuesModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title h5" id="issuesLabel">...</span>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="center">
+        <div class="modal-body pad issues_body" id="issues_body">
+          ...
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<!-- <img id="loading-image" src="/static/images/ajax-loader.gif" style="display:none;"/> -->
+<div class="loader h3" style="display: none" id="loader">Loading ...</div>
+
  <style>
-  body {  
-    /*background: url("back1.jpg") no-repeat center center fixed; */
-    background-size: cover;
-}
-.modal-header, h4, .close {
+    body {  
+      /*background: url("back1.jpg") no-repeat center center fixed; */
+      background-size: cover;
+    }
+
+    .loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin: -50px 0px 0px -50px;
+    }
+
+    .box {
+      height: 10vw;
+      width: 10vw;
+    }
+
+    .modal-header, h4, .close {
       background-color: #182530;
       color:white !important;
       text-align: center;
       font-size: 30px;
+    }
+    .modal-content{
+      background-color: #e6e6e6;
+    }
+    .modal-footer {
+        background-color: #182530;
+    }
+
+    .center {
+      align-self: center;
+      text-align: center;
+    }
+
+    .border {
+      border: solid 0px black;
+    }
+
+    .pad {
+      padding: 1vw;
+    }
+
+    .pad-top {
+      padding-top: 2.5vw;
+    }
+
+    .pad-bottom {
+     padding-bottom: 2.5vw; 
+    }
+
+    .dashboard {
+      margin-top: 1.5vw;
+    }
+
+    .x400x {
+      height: 400px;
+    }
+
+    #message {
+      margin-top: 30px;
+    }
+
+    .issues_body {
+      vertical-align: middle;
+      text-align: left;
+      overflow-y: scroll; 
+      max-height: 500px; 
+      min-height: 250px;
+    }
+
+    .state {
+      color: #55AA00;
+    }
+
+    body {
+      background-color: white;
+    }
+  </style>
+
+<script>
+  function show_dashboard(value){
+    // console.log(value);
+    $('#graphs').empty();
+    // console.log($('#dashboard').val());
+    if(value == "All Issues")
+    {
+      create_graph_for_url('total','','','doughnut','by_status','secreviews');
+      create_graph_for_url('total','','','doughnut','by_status','secbugs');
+      create_graph_for_url('total','','','doughnut','by_severity','secbugs');
+    }
+
+    if(value == "Jiras in 2 Weeks")
+    {
+      create_graph_for_url('total','','','bar','by_status','','14');
+      create_graph_for_url('total','','','bar','by_status','secbugs','14');
+      create_graph_for_url('total','','','bar','by_severity','secbugs','14');      
+    }
+
+    if(value == "By Severity")
+    {
+      create_graph_for_url('total','','','doughnut','by_severity','secbugs');
+      create_graph_for_url('total','','','bar','by_severity','secbugs','14');
+      create_graph_for_url('total','me','','polarArea','by_severity','secbugs');
+      create_graph_for_url('total','','me','polarArea','by_severity','secbugs');      
+    }
+
+    if(value == "My Metrics")
+    {
+      create_graph_for_url('total','me','','polarArea','by_status','secreviews');
+      create_graph_for_url('total','','me','polarArea','by_status','secreviews');
+      create_graph_for_url('total','me','','polarArea','by_status','secbugs');
+      create_graph_for_url('total','','me','polarArea','by_status','secbugs');
+      create_graph_for_url('total','me','','polarArea','by_severity','secbugs');
+      create_graph_for_url('total','','me','polarArea','by_severity','secbugs');
+    }
+
+    if(value == "Open Tickets in 2 Weeks")
+    {
+      create_graph_for_url('open','','','polarArea','by_status','','14');
+    }
   }
-.modal-content{
-  background-color: #e6e6e6;
-}
-  .modal-footer {
-      background-color: #182530;
-  }
 
-</style>  
-<center>
-<div><br /><br /><br />
-  <div class="container" align="center">
-    {% if message %}
-        <div class="alert alert-{{ category }}" role="alert" style="width: 50%">
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span></button>
-      {{ message | safe }}
-      </div>
-    {% endif %}
-  </div>
+  show_dashboard("Open Tickets in 2 Weeks");
 
-<h2><br />
-  {% if session.access_token %}
-  <a href="/new_secreview"><button type="button" class="btn btn-grey btn-md" style="width:300px" data-toggle="modal" data-target="#myModal" id="new-scan" >
-    <strong>New security Review</strong>
-  </button></a>
-  {% endif %}
-    <button type="button" class="btn btn-grey btn-md dropdown dropdown-toggle line-spacing" style="width:300px" id="new-scan">
-      <a class="dropdown-toggle" type="button" data-toggle="dropdown" style="color:white" >
-      <span class="glyphicon glyphicon-th"></span>
-        Knowledge Base
-      <span class="caret"></span></a>
-      <ul class="dropdown-menu" style="width:300px">
-        <li><a href="/security_base"><span class="glyphicon glyphicon-log-out"></span> Security Knowledge Base</a></li>
-        <li><a href="/rfp_base"><span class="glyphicon glyphicon-log-out"></span> RFP Knowledge Base</a></li>
-      </ul>
-    </button>
-  {% if session.appsec_user %}
-  <a href="/close_tickets"><button type="button" class="btn btn-grey btn-md" style="width:300px" id="new-scan" >
-    <strong>Close Tickets</strong>
-  </button></a>
-  {% endif %}
-</h2>
-
-    <!-- Footer -->
-    {% extends "footer.html" %}
-    <!-- Footer -->
+</script>
+<!-- Footer -->
+{% extends "footer.html" %}
+<!-- Footer -->
 </body>
 </html>
