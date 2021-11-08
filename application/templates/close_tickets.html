@@ -48,7 +48,7 @@
 
 </style>  
 <div align="center">
-  <div style="max-width: 800px" align="left">
+  <div style="width: 100%; max-width: 1024px" align="left">
   <div class="container" align="center">
     {% if message %}
         <div class="alert alert-{{ category }}" role="alert" style="width: 50%">
@@ -61,7 +61,7 @@
 
 <H3>Welcome {{session.email}}</H3>
 <script>$('.icon_info').tooltip();</script>
-<style>.container { width: 70%; } .red { color: red; } .blue { color: blue;} .green { color: green; } .orange { color: orange; } </style>
+<style>.container { width: 100%; } .red { color: red; } .blue { color: blue;} .green { color: green; } .orange { color: orange; } </style>
 
 <div id="ticket_details" class="shown">
 {% if secreview_string != "" %}
@@ -88,11 +88,15 @@
     <form action="/close_tickets" method="POST" enctype="multipart/form-data"><br />
     <div id="ticket_meta">
       <div class="pull-right">
-        <button class="btn btn-warning btn-md float-right" onclick="return go_back()">back</label>
+        <button class="btn btn-warning btn-md float-right" onclick="return go_back()">back</button>
       </div>
       <label>Ticket No</label> &nbsp;&nbsp;#&nbsp;&nbsp;<span id="key" class="label label-info"></span><br />
       <label>Title</label>&nbsp;&nbsp;#&nbsp;&nbsp;<span id="summary" class="label label-default">summary</span></br>
       <label>Status</label>&nbsp;&nbsp;#&nbsp;&nbsp;<span id="status" class="label label-warning"></span></br></br>
+      <!-- <div class="pull-right">
+        <button class="btn btn-primary btn-md float-right" onclick="return followup()">Follow up</button>
+      </div> -->
+      <label>Due Since</label>&nbsp;&nbsp;#&nbsp;&nbsp;<span id="due_days" class="label label-danger"></span></br></br>
     </div>
 
     <div class="panel panel-default">
@@ -111,14 +115,101 @@
     <script>
       var peer_review_enabled = {{peer_review_enabled|safe}};
       PEER_REVIEW_REQUIRED_FOR = [];
+
       if(peer_review_enabled)
         PEER_REVIEW_REQUIRED_FOR = {{PEER_REVIEW_REQUIRED_FOR|safe}};
+
+      window.follow_message = "";
+      window.ticket_id = "";
+      console.log('text');
+      window.assignee = "{{config.DEFAULT_USER|e}}";
+
+      function followup(key, status, summary, requestingfor, due_days, follow_class,assigned){
+        if(assigned == "None")
+          assigned = window.assignee;
+        else
+          window.assignee = assigned;
+
+        document.getElementById('follow_key').innerHTML = key;
+        document.getElementById('follow_summary').innerHTML = summary;
+        document.getElementById('follow_status').innerHTML = status;
+        document.getElementById('follow_requestingfor').innerHTML = requestingfor;
+        document.getElementById('follow_due_days').innerHTML = due_days+" days";
+        $('#follow_due_days').addClass('label-'+follow_class);
+        document.getElementById('follow_assignee').value = assigned;
+
+
+        window.ticket_id = key;
+
+        window.follow_message = "Hey, \n\nThis issue is pending from "+due_days+" days. Request you to provide an update as soon as possible.\n\nAppsec.";
+
+        console.log(window.follow_message);
+
+        $('#follow_comment').html(window.follow_message);
+      }
+
+      function doFollowup(){
+        const form = document.getElementById('followup_form');
+        var form_data = new FormData(form);
+        form_data.append('ticket_id',window.ticket_id);
+        form_data.append('comment',window.follow_message);
+        form_data.append('assigned',$('#follow_assignee').val());
+
+        window.assignee = "{{config.DEFAULT_USER|e}}";
+
+        fetch(form.action, {
+          method: form.method,
+          body: form_data,
+        }).then(response => {
+          return response.json();
+        }).then(data => {
+          alert(data.message);
+          $('#form_close').click();
+        }).catch(err => {
+          console.log(err);
+          console.log("Error Occured while fething api : "+apiUrl);
+        });
+      }
+
     </script>
     <div id="Action" style="width: 200px">
 
     </div><br /><br />
     </form>
   </div>
+
+  <div class="modal fade" id="followModal" tabindex="-1" role="dialog" aria-labelledby="followModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="padding: 10px">
+      <div class="modal-content">
+        <div class="modal-header" style="padding: 20px">
+          <h5 class="modal-title" id="exampleModalLabel">Followup Issue</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="/doFollowup" method="POST" id="followup_form">
+          <div class="modal-body" style="padding: 20px">
+            <label>Ticket No</label> &nbsp;&nbsp;#&nbsp;&nbsp;<span id="follow_key" class="label label-info"></span><br />
+            <label>Title</label>&nbsp;&nbsp;#&nbsp;&nbsp;<span id="follow_summary" class="label label-default">summary</span></br>
+            <label>Status</label>&nbsp;&nbsp;#&nbsp;&nbsp;<span id="follow_status" class="label label-warning"></span></br>
+            <label>Requesting For</label>&nbsp;&nbsp;#&nbsp;&nbsp;<span id="follow_requestingfor" class="label label-default"></span></br>
+            <label>Due Since</label>&nbsp;&nbsp;#&nbsp;&nbsp;<span id="follow_due_days" class="label"></span></br></br>
+
+            <label>Assignee</label>&nbsp;&nbsp;#&nbsp;&nbsp;<input type="text" id="follow_assignee" class="input" placeholder="assignee name or email"></input></br></br>
+
+            <label>Followup Comment: </label></br>
+            <textarea class="form-control" id="follow_comment" rows="7" cols="50" placeholder="..."></textarea>
+          
+          </div>
+          <div class="modal-footer" style="padding: 20px">
+            <button type="button" id="form_close" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <input type="button" onClick="doFollowup()" class="btn btn-primary" value="Follow Up">
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 
   <br /><br /><br /><br />
   </div>

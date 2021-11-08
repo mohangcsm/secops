@@ -71,10 +71,20 @@
         <br><br><br><br>
         
     </div><!-- /.container -->
-<script>$(function () 
-      { $("[data-toggle='popover']").popover();
-      });
-   </script>
+    <div class="loader h3" style="display: none" id="loader">Loading ...</div>
+    <style>
+      .loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: -50px 0px 0px -50px;
+      }
+    </style>
+  <script>
+    $(function (){
+     $("[data-toggle='popover']").popover();
+    });
+  </script>
     <!-- Footer -->
     {% extends "footer.html" %}
     <!-- Footer -->

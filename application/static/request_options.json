@@ -603,6 +603,13 @@
                 "elementType" : "input"
             },
             {
+                "label" : "Issue Severity",
+                "type" : "dropdown",
+                "name" : "Issue_Severity",
+                "elementType" : "dropdown",
+                "options" : ["Highest", "High", "Medium", "Low", "Lowest"]
+            },
+            {
                 "label" : "Application Name",
                 "type" : "text",
                 "name" : "Product_Title",

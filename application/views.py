@@ -31,7 +31,10 @@ JIRA_COMPONENTS = JIRA_SETTINGS['JIRA_COMPONENTS']
 JIRA_FILTERS = JIRA_SETTINGS["JIRA_FILTERS"]
 JIRA_OPTIONS = {'server': JIRA_URL,'verify':False}
 
+DEFAULT_USER = app.config['DEFAULT_USER']
+
 app.config['JIRA_URL'] = JIRA_URL
+user_email = ""
 
 jira = JIRA(JIRA_OPTIONS, basic_auth=(JIRA_USER,JIRA_PASS))
 
@@ -90,24 +93,35 @@ def create_secreview():
         Product_Title = "["+requestingfor+"] "+args.get('Issue_Title')
 
 
+    Issue_Severity = args.get('Issue_Severity')
+    if not Issue_Severity:
+        Issue_Severity = "Medium"
+
     description = ""
     for key in args:
         if key != "requestingfor":
             value = args.get(key)
             if key in ('steps to reproduce','Recommendation'):
                 value = "\n{code}"+value+"{code}"
+
             if key in ("Environment Details"):
                 value = "\n"+value
 
+            if key in ("Issue_Severity"):
+                continue
+
             description +="*"+key+"* : "+value+"\n"
+
     description+="*Ticket Raised By* : "+session.get('email');
 
     description = "*requestingfor* : "+requestingfor+"\n"+description
 
-    result = create_new_jira(jira,JIRA_SETTINGS,Product_Title,description,component,peer_review_enabled)
+    result = create_new_jira(jira,JIRA_SETTINGS,Product_Title,description,component,peer_review_enabled,Issue_Severity)
+
+    # return jsonify(result)
 
     if result.key:
-        redirect_url = JIRA_URL+"/browse/"+result.key
+        redirect_url = JIRA_URL+"browse/"+result.key
         # return redirect(redirect_url), 302
         return render_template("index.html",message="Ticket raised successfully: "+result.key+".<br /><br /><a href='"+redirect_url+"' target='_blank'>click here to view the ticket.</a>")
 
@@ -126,7 +140,7 @@ def close_tickets():
         return render_template("index.html",message="You are not authorized",category="danger"), 403        
 
     if request.method == 'GET':
-        [secreview_string,secbugs_string] = get_open_tickets(jira,JIRA_SETTINGS)
+        [secreview_string,secbugs_string] = get_open_tickets(jira,JIRA_SETTINGS,session.get('email'))
         return render_template('close_tickets.html',
             peer_review_enabled = str(peer_review_enabled).lower(),
             PEER_REVIEW_REQUIRED_FOR = PEER_REVIEW_REQUIRED_FOR,
@@ -257,6 +271,19 @@ def get_tickets(jira_filter='-1'):
 def ticket_statuses():
     return get_jira_states(JIRA_SETTINGS)
 
+
+@app.route('/doFollowup', methods=['POST'])
+def do_followup():
+
+    args = request.form
+    key = args.get('ticket_id')
+    comment = args.get('comment')
+    assignee = args.get('assigned')
+
+    followup_status = jira_followup(jira,key, comment, assignee)
+    return jsonify(followup_status)
+
+
 @app.route('/security_base')
 def security_base():
     return render_template('index.html',message="currently not available", category="warning"), 200
@@ -369,6 +396,8 @@ def authorized(resp):
     session['verified'] = True
     session['oauth_uid'] = res['id']
     session['appsec_user'] = is_appsec_user(res['email'])
+    global user_email
+    user_email = res['email']
 
     if session['access_token']:
         return redirect(url_for('index'))
