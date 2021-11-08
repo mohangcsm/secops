@@ -219,15 +219,18 @@ def get_jira_issue_strings(open_issues, JIRA_SETTINGS,user_email):
         follow_days = 'Follow up ('+due_days+' days)'
         follow_class = "primary"
 
-        if int(due_days) == -9999:
-            follow_class = "info"
-            follow_days = "No Due date"
-
         if int(due_days) > 10:
             follow_class = "warning"
 
         if int(due_days) > 30:
             follow_class = "danger"
+
+        if int(due_days) < 0:
+            follow_class = "success"
+
+        if int(due_days) == -9999:
+            follow_class = "info"
+            follow_days = "No Due date"
 
         follow_onclick = '"followup(\''+key+'\',\''+status+'\',\''+summary+'\',\''+requestingfor+'\',\''+due_days+'\',\''+follow_class+'\',\''+assignee+'\')"'
         if int(due_days) == -9999:
