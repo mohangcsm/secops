@@ -39,6 +39,8 @@ $ docker run -p80:80 -v $(pwd):/app -d secops
     - update the `JIRA_SETTINGS` with jira url and credentials. use jira access token instead of password
     - update the `JIRA_TRANSTIONS` according to 1factor workflow
     - update `external page links settings` as required.
+    - create a default user (appsec) in JIRA `or` update DEFAULT_USER in config with any one of the jira user
+
 #####
 - Update JIRA Project Configuration to integrate with SECOPS Framework
     - Create Workflow according to the requirement. Workflows required for 1-factor approval and 2-factor approval can be found in the `WORKFLOWS` folder
@@ -165,6 +167,7 @@ v1.1
  - Security Metrics added with multiple dashboards.
  - Option for adding Security Policies and guidelines added in menu.
  - Security Code review UI controls added.
+ - UI based followup controls for security reviews and security bugs.
 
 v1.0
  - Unified Security review creation and Security Bug creation features added.
@@ -176,7 +179,6 @@ v1.0
 ### Roadmap
 ~~~~
  - Executive summary mailer for Security Metrics.
- - UI based followup controls for security reviews and security bugs.
  - API Integration with DAST, SAST and FOSS tools.
 ~~~~
 
