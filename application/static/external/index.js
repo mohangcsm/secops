@@ -1,3 +1,11 @@
+
+const all_statusses = {};
+const color_by_status = {};
+const colors = {};
+
+const myCharts = {};
+
+
 var request_options_all = (function() {
         var json = null;
         $.ajax({
@@ -117,6 +125,32 @@ function requestingfor() {
             createLabel(base_elements[index]['label']);
         }
 
+        if (elementType == "dropdown"){
+          var input = document.createElement("DIV");
+          var input_select = document.createElement("SELECT");
+
+          input_select.name = base_elements[index]['name'];
+          // var options = base_elements[index]['options'];
+
+          var options = all_statusses['by_severity'];
+          
+          for(var i=0; i < options.length; i++)
+          {
+            var op = document.createElement("option");
+            op.value = options[i];
+            op.text = options[i];
+            input_select.appendChild(op);
+          }
+
+          input.classList.add("mb-3");
+          input.appendChild(input_select);
+          input.appendChild(document.createElement("BR"));
+          input.appendChild(document.createElement("BR"));
+
+          if(base_elements[index].hasOwnProperty("label"))
+            createLabel(base_elements[index]['label']);
+        }
+
         if (elementType == "file"){
           var input = document.createElement("INPUT");
           input.type = base_elements[index]['type'];
@@ -162,7 +196,7 @@ function requestingfor() {
 
   }
 
-function open_issue(key,status,summary,requestingfor){
+function open_issue(key,status,summary,requestingfor,due_days){
   if(status == "To Do" || status == "Waiting for customer")
     alert("Ticket can not be Approved. Only Reject action allowed with JIRA status# "+status);
  
@@ -222,6 +256,8 @@ function open_issue(key,status,summary,requestingfor){
   document.getElementById('ticket_status').value = status;
   document.getElementById('ticket_id').value = key;
   document.getElementById('requestingfor').value = requestingfor;
+  document.getElementById('due_days').innerHTML = due_days+" days";
+  
 
   var div_ticket_details = document.getElementById('ticket_details');
   div_ticket_details.classList.remove("shown");
@@ -263,12 +299,6 @@ function open_issue(key,status,summary,requestingfor){
 
   });
 }
-
-const all_statusses = {};
-const color_by_status = {};
-const colors = {};
-
-const myCharts = {};
 
 function draw_graph(graph_id,canvas_id,data,chartType,filter_type, title){
   var statusses = all_statusses[filter_type];
@@ -444,21 +474,36 @@ function hideLoader() {
     }, 1000);
 }
 
-$.ajax({
-  'async': false,
-  'global': false,
-  'url': "/ticket_states/",
-  'dataType': "json",
-  'success': function(data) {
-    all_statusses['by_status'] = data['by_status'];
-    all_statusses['by_severity'] = data['by_severity'];
-    colors['BACKGROUND'] = data.COLOR_CODES['BACKGROUND'];
-    colors['BORDER'] = data.COLOR_CODES['BORDER'];
-    
-    Object.keys(data['STATUS_CODES']).forEach(element => (function(){
-      color_by_status[element] = data['STATUS_CODES'][element];
-    })());
+function get_states(){
+  return $.ajax({
+    'async': false,
+    'global': false,
+    'url': "/ticket_states/",
+    'dataType': "json",
+    'beforeSend': function() {
+        $(".loader").show();
+        showLoader();
+      },
+    'success': function(data) {
+      all_statusses['by_status'] = data['by_status'];
+      all_statusses['by_severity'] = data['by_severity'];
+      colors['BACKGROUND'] = data.COLOR_CODES['BACKGROUND'];
+      colors['BORDER'] = data.COLOR_CODES['BORDER'];
+      
+      Object.keys(data['STATUS_CODES']).forEach(element => (function(){
+        color_by_status[element] = data['STATUS_CODES'][element];
+      })());
+      return data.responseJSON;
+    },
+    'complete': function(data){
+      $(".loader").hide();
+      hideLoader();
+    }
+  });  
+}
 
-    // console.log(all_statusses);
-  }
-});
+if (Object.keys(all_statusses).length == 0)
+{
+  get_states();
+}
+
