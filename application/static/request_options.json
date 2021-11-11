@@ -617,6 +617,13 @@
                 "elementType" : "input"
             },
             {
+                "label" : "Parent Review ID",
+                "type" : "text",
+                "name" : "Parent_Ticket",
+                "placeholder" : "Secreview Jira ID. Leave Empty if no parent",
+                "elementType" : "input"
+            },
+            {
                 "label" : "Detailed Steps needed to reproduce the issue",
                 "name" : "steps to reproduce",
                 "innerHtml" : "\n",

@@ -9,13 +9,19 @@ app.config.from_object(__name__)
 JIRA_SETTINGS = app.config['JIRA_SETTINGS']
 DEFAULT_USER = app.config['DEFAULT_USER']
 
+JIRA_URL = JIRA_SETTINGS['JIRA_URL']
+JIRA_USER = JIRA_SETTINGS['JIRA_USER']
+JIRA_PASS = JIRA_SETTINGS['JIRA_PASS']
+
+JIRA_PROJECT = JIRA_SETTINGS["JIRA_PROJECT"]
+
+JIRA_COMPONENTS = JIRA_SETTINGS["JIRA_COMPONENTS"]
+JIRA_FILTERS = JIRA_SETTINGS["JIRA_FILTERS"]
+JIRA_TRANSITIONS = JIRA_SETTINGS['JIRA_TRANSITIONS']
+
 def create_new_jira(jira,JIRA_SETTINGS,product_title="", description="",component="Security Review",peer_review_enabled=False,Issue_Severity="Medium"):
     
-    JIRA_PROJECT = JIRA_SETTINGS['JIRA_PROJECT']
-    JIRA_COMPONENTS = JIRA_SETTINGS['JIRA_COMPONENTS']
-    
-    JIRA_TRANSITIONS = JIRA_SETTINGS['JIRA_TRANSITIONS'][peer_review_enabled]
-    TODO_TRANS = JIRA_TRANSITIONS['TODO_TRANS']
+    TODO_TRANS = JIRA_TRANSITIONS[peer_review_enabled]['TODO_TRANS']
 
     task = "Task"
     if component == JIRA_COMPONENTS["SECURITY_BUG"]:
@@ -72,11 +78,6 @@ def create_new_jira(jira,JIRA_SETTINGS,product_title="", description="",componen
     return None
 
 def get_jira_issues(jira, JIRA_SETTINGS, jira_filter, assignee=None, reporter=None, user_email=None, since=None):
-    JIRA_URL = JIRA_SETTINGS["JIRA_URL"]
-    JIRA_PROJECT = JIRA_SETTINGS["JIRA_PROJECT"]
-    JIRA_COMPONENTS = JIRA_SETTINGS["JIRA_COMPONENTS"]
-
-    JIRA_FILTERS = JIRA_SETTINGS["JIRA_FILTERS"]
 
     jira_filter = 'filter='+str(jira_filter)
     if assignee:
@@ -94,10 +95,6 @@ def get_jira_issues(jira, JIRA_SETTINGS, jira_filter, assignee=None, reporter=No
 
 
 def create_dashboard_stats(open_issues, JIRA_SETTINGS, user_email):
-    JIRA_URL = JIRA_SETTINGS["JIRA_URL"]
-    JIRA_PROJECT = JIRA_SETTINGS["JIRA_PROJECT"]
-    JIRA_COMPONENTS = JIRA_SETTINGS["JIRA_COMPONENTS"]
-
     return_obj = {}
     issue_statusses = {}
     issue_priorities = {}
@@ -126,10 +123,6 @@ def create_dashboard_stats(open_issues, JIRA_SETTINGS, user_email):
     return return_obj
 
 def get_jira_states(JIRA_SETTINGS):
-    JIRA_URL = JIRA_SETTINGS['JIRA_URL']
-    JIRA_USER = JIRA_SETTINGS['JIRA_USER']
-    JIRA_PASS = JIRA_SETTINGS['JIRA_PASS']
-    JIRA_PROJECT = JIRA_SETTINGS['JIRA_PROJECT']
 
     STATUS_N_SEVERITY = JIRA_SETTINGS['STATUS_N_SEVERITY']
     STATUS_CODES = JIRA_SETTINGS['STATUS_CODES']
@@ -157,11 +150,6 @@ def get_jira_states(JIRA_SETTINGS):
 
 def get_open_tickets(jira,JIRA_SETTINGS,user_email):
 
-    JIRA_URL = JIRA_SETTINGS["JIRA_URL"]
-    JIRA_PROJECT = JIRA_SETTINGS["JIRA_PROJECT"]
-    JIRA_COMPONENTS = JIRA_SETTINGS["JIRA_COMPONENTS"]
-    JIRA_FILTERS = JIRA_SETTINGS["JIRA_FILTERS"]
-
     open_issues = jira.search_issues('filter='+str(JIRA_FILTERS['open_tickets']), maxResults=1000)
 
     return get_jira_issue_strings(open_issues, JIRA_SETTINGS, user_email);
@@ -170,10 +158,6 @@ def get_jira_issue_strings(open_issues, JIRA_SETTINGS,user_email):
 
     secreview_string = ""
     secbugs_string = ""
-
-    JIRA_URL = JIRA_SETTINGS["JIRA_URL"]
-    JIRA_PROJECT = JIRA_SETTINGS["JIRA_PROJECT"]
-    JIRA_COMPONENTS = JIRA_SETTINGS["JIRA_COMPONENTS"]
 
     for open_issue in open_issues:
         status = str(open_issue.fields.status.name)
@@ -298,11 +282,8 @@ def jira_followup(jira, key, comment, assignee='appsec'):
     return_obj = {}
     return_obj['key'] = key
 
-    accId = get_jira_accId(assignee)
-    
-    if not accId:
-        accId = "603e67b8cc13b6006997f161"
-
+    accId = ""
+    accId = get_jira_accId(assignee)    
     if not key or not comment:
         return_obj['status'] = "error"
         return_obj['message'] = "key or comment missing"
@@ -322,10 +303,6 @@ def jira_followup(jira, key, comment, assignee='appsec'):
 
 def get_jira_accId(user):
 
-    JIRA_URL = JIRA_SETTINGS['JIRA_URL']
-    JIRA_USER = JIRA_SETTINGS['JIRA_USER']
-    JIRA_PASS = JIRA_SETTINGS['JIRA_PASS']
-
     user = requests.get(JIRA_URL+'rest/api/latest/user/search?query='+user, auth=HTTPBasicAuth(JIRA_USER, JIRA_PASS), verify=False).json()
     if(len(user)):
         user = user[0]
@@ -335,7 +312,33 @@ def get_jira_accId(user):
 
     return accId
 
+def assign_issue(jira, key, assignee):
+
+    accId = get_jira_accId(assignee)
+
+    payload = {'accountId': accId}
+
+    assignment_status = None
+    try:
+        assignment_status = requests.put(JIRA_URL+'rest/api/latest/issue/'+key+'/assignee', json=payload, auth=HTTPBasicAuth(JIRA_USER, JIRA_PASS), verify=False)
+        if assignment_status.status_code == 204:
+            return "Success"
+
+    except Exception, ae:
+        return "Failed"
 
 
+    return "Failed"
 
+def link_issue(jira, key1, key2):
+    try:
+        link_status = jira.create_issue_link('blocks', key1, key2)
+        if link_status.status_code == 201:
+            return "Success"
 
+        return "Failed"
+
+    except Exception, ae:
+        return str(ae)
+
+    return "Failed"
