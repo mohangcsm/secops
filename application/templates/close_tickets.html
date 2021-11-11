@@ -152,7 +152,7 @@
         const form = document.getElementById('followup_form');
         var form_data = new FormData(form);
         form_data.append('ticket_id',window.ticket_id);
-        form_data.append('comment',window.follow_message);
+        form_data.append('comment',$('#follow_comment').val());
         form_data.append('assigned',$('#follow_assignee').val());
 
         window.assignee = "{{config.DEFAULT_USER|e}}";

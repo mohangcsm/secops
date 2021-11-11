@@ -54,9 +54,10 @@ google = oauth.remote_app(
 
 
 @app.route('/', methods=['GET'])
+@app.route('/dashboard', methods=['GET'])
 def index():
-    if not session.get('access_token'):
-        return render_template("login.html"), 403
+    # if not session.get('access_token'):
+    #     return render_template("login.html"), 403
 
     return render_template('index.html',message=" ",category=""), 200
 
@@ -99,7 +100,7 @@ def create_secreview():
 
     description = ""
     for key in args:
-        if key != "requestingfor":
+        if key not in ("requestingfor","Parent_Ticket"):
             value = args.get(key)
             if key in ('steps to reproduce','Recommendation'):
                 value = "\n{code}"+value+"{code}"
@@ -122,7 +123,10 @@ def create_secreview():
 
     if result.key:
         redirect_url = JIRA_URL+"browse/"+result.key
-        # return redirect(redirect_url), 302
+
+        if requestingfor == "sec_bug" and "Parent_Ticket" in args:
+            link_status = link_issue(jira, result.key, args.get("Parent_Ticket"))
+
         return render_template("index.html",message="Ticket raised successfully: "+result.key+".<br /><br /><a href='"+redirect_url+"' target='_blank'>click here to view the ticket.</a>")
 
     return render_template('new_secreview.html',
@@ -279,8 +283,15 @@ def do_followup():
     key = args.get('ticket_id')
     comment = args.get('comment')
     assignee = args.get('assigned')
+    if '@' in assignee:
+        assignee = assignee.split("@")[0]
 
     followup_status = jira_followup(jira,key, comment, assignee)
+
+    message = assign_issue(jira, key, assignee)
+
+    followup_status['assignment_status'] = str(message)
+
     return jsonify(followup_status)
 
 
@@ -433,15 +444,18 @@ def server_error_403(e):
 
     return render_template(redirect,message="User not authorized to view this resource.",category="warning"), 403
 
-# @app.errorhandler(Exception)
+@app.errorhandler(Exception)
 @app.errorhandler(500)
 def server_error_500(e):
     redirect = "login.html"
     
+    message="Something went wrong ! Please try again."
     access_token = session.get('access_token')
     if access_token:
         redirect = "index.html"
+        message = str(e)
+        
 
-    return render_template(redirect,message="Something went wrong ! Please try again.",category="danger"), 500
+    return render_template(redirect,message=message,category="danger"), 500
 ############ Do not modify these route/functions ############
 
