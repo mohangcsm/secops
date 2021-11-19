@@ -65,7 +65,7 @@
 
 <div id="ticket_details" class="shown">
 {% if secreview_string != "" %}
-  <br/><H4>Open Security Reviews :</H4>
+  <br/><H4>Open Security Reviews : {{ secreview_count }}</H4>
   <table>
     {{secreview_string|safe}}
   </table>
@@ -73,7 +73,7 @@
 {% endif %}
 
 {% if secbugs_string != "" %}
-  <br/><H4>Open Security Bugs :</H4>
+  <br/><H4>Open Security Bugs : {{ secbugs_count }}</H4>
   <table>
     {{secbugs_string|safe}}
   </table>
@@ -85,7 +85,7 @@
   issue_key = "";
 </script>
   <div class="hidden" id="description">
-    <form action="/close_tickets" method="POST" enctype="multipart/form-data"><br />
+    <form action="/close_tickets" onSubmit="return check_status()" method="POST" enctype="multipart/form-data"><br />
     <div id="ticket_meta">
       <div class="pull-right">
         <button class="btn btn-warning btn-md float-right" onclick="return go_back()">back</button>
@@ -110,9 +110,34 @@
       <input type="hidden" name="status" id="ticket_status" value="">
       <input type="hidden" name="requestingfor" id="requestingfor" value="">
     </div> 
+    <label>Select Approver # </label>
+      <select id="REVIEW_APPROVERS" name="approver"></select>
+      <script>
+        var REVIEW_APPROVERS = {{REVIEW_APPROVERS|safe}};
+        var input_select = document.getElementById('REVIEW_APPROVERS');
+        $.each(REVIEW_APPROVERS, function(key,value){
+          if(value != "{{session.email}}")
+          {
+            var op = document.createElement("option");
+            op.value = value;
+            op.text = value;
+            input_select.appendChild(op);
+          }
+        });
+      </script>
     <H4><span class=" label label-info">Any Additional Comments? (Mandatory for Reject)</span></H4>
     <textarea class="form-control" rows=3 class="form-control" type="text" id="comments" name="comments"></textarea><br/>
     <script>
+
+      function check_status(){
+        var ticket_status = $('#ticket_status').val();
+        var not_allowed = ["Backlog","To Do", "ToStart", "Open"];
+        if(not_allowed.includes(ticket_status))
+          alert("Issue is not in In-Progress state; Only Reject action is allowed.");
+
+        return !not_allowed.includes(ticket_status);
+      }
+
       var peer_review_enabled = {{peer_review_enabled|safe}};
       PEER_REVIEW_REQUIRED_FOR = [];
 
@@ -141,7 +166,7 @@
 
         window.ticket_id = key;
 
-        window.follow_message = "Hey, \n\nThis issue is pending from "+due_days+" days. Request you to provide an update as soon as possible.\n\nAppsec.";
+        window.follow_message = "Hey, \n\nThis issue is pending from "+due_days+" days. Request you to provide an update as soon as possible.\n\n ";
 
         console.log(window.follow_message);
 
@@ -167,7 +192,7 @@
           $('#form_close').click();
         }).catch(err => {
           console.log(err);
-          console.log("Error Occured while fething api : "+apiUrl);
+          console.log("Error Occured while fething api : "+form.action);
         });
       }
 

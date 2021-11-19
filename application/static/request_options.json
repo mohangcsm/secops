@@ -25,6 +25,7 @@
             "Architecture Review" : "arch_review",
             "Security Bug" : "sec_bug",
             "Security Code Scan" : "code_scan",
+            "Falcon Review Request" : "falcon_request",
             "Others" : "others"
         }
     },
@@ -49,8 +50,8 @@
                 "elementType" : "textarea"
             },
             {
-                "type" : "text",
                 "label" : "Existing Files",
+                "type" : "text",
                 "name" : "Existing_Files",
                 "placeholder" : "Upload files into google drive and provide link here",
                 "elementType" : "input"  
@@ -534,8 +535,15 @@
         ],
         "others" : [
             {
+                "label" : "Summary/Title of the request",
+                "type" : "text",
+                "name" : "Request_Title",
+                "placeholder" : "Summary/Title of the request",
+                "elementType" : "input"
+            },
+            {
                 "label" : "Please enter the requirement below",
-                "name" : "others",
+                "name" : "Details",
                 "innerHtml" : "",
                 "elementType" : "textarea"
             }
@@ -617,6 +625,13 @@
                 "elementType" : "input"
             },
             {
+                "label" : "Business Unit Name / Team Name",
+                "type" : "text",
+                "name" : "Business_unit",
+                "placeholder" : "Business Unit Name / Team Name",
+                "elementType" : "input"
+            },
+            {
                 "label" : "Parent Review ID",
                 "type" : "text",
                 "name" : "Parent_Ticket",
@@ -669,8 +684,34 @@
                 "placeholder" : "master",
                 "elementType" : "input"
             }
+        ],
+        "falcon_request" : [
+            {
+                "label" : "Application Name",
+                "type" : "text",
+                "name" : "Product_Title",
+                "placeholder" : "Enter your service name",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Service Name",
+                "type" : "text",
+                "name" : "Service_Title",
+                "placeholder" : "Enter service with which authnz is integrating",
+                "elementType" : "input"  
+            },
+            {
+                "label" : "API Collection details",
+                "name" : "API_Collegction",
+                "innerHtml" : "Provide API collection details (postman or curl calls)",
+                "elementType" : "textarea"  
+            },
+            {
+                "label" : "BitBucket Code Repo Details",
+                "name" : "Code_Details",
+                "innerHtml" : "Repository URL: \nRepository Branch: ",
+                "elementType" : "textarea"  
+            }
         ]
-
     }
 }
-

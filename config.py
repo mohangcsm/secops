@@ -46,7 +46,8 @@ class Config(object):
     #-------other settings---------#
     ALLOWED_DOMAINS = ['gmail.com']
     SECURITY_EMAIL = 'mohan.gcsm@gmail.com'
-    APPSEC_USERS = ['mohan.gcsm@gmail.com']
+    APPSEC_USERS = REVIEW_APPROVERS = ['mohan.gcsm@gmail.com']
+    DEFAULT_DOMAIN = "gmail.com"
     DEFAULT_USER = "appsec" #must be a valid JIRA user.
     PEER_REVIEW_ENABLED = False
     PEER_REVIEW_REQUIRED_FOR = [

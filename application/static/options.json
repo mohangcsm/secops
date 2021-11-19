@@ -39,5 +39,10 @@
         "Third Party CMS" : "third_party_cms",
         "Reverse Engineering Checks" : "reverse_engg",
         "Security Code Review" : "sec_code_review"
+    },
+    "review_options" : {
+        "Code Review Completed" : "code_reviewed",
+        "Test Cases Verified" : "testing_verified",
+        "Configuration Reviewed" : "config_review"
     }
 }

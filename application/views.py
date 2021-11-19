@@ -27,6 +27,7 @@ JIRA_PROJECT = JIRA_SETTINGS['JIRA_PROJECT']
 peer_review_enabled = app.config['PEER_REVIEW_ENABLED']
 JIRA_TRANSITIONS = JIRA_SETTINGS['JIRA_TRANSITIONS'][peer_review_enabled]
 PEER_REVIEW_REQUIRED_FOR = app.config['PEER_REVIEW_REQUIRED_FOR']
+REVIEW_APPROVERS = app.config['REVIEW_APPROVERS']
 JIRA_COMPONENTS = JIRA_SETTINGS['JIRA_COMPONENTS']
 JIRA_FILTERS = JIRA_SETTINGS["JIRA_FILTERS"]
 JIRA_OPTIONS = {'server': JIRA_URL,'verify':False}
@@ -52,13 +53,9 @@ google = oauth.remote_app(
     consumer_secret=app.config['GOOGLE_CLIENT_SECRET']
 )
 
-
 @app.route('/', methods=['GET'])
 @app.route('/dashboard', methods=['GET'])
 def index():
-    # if not session.get('access_token'):
-    #     return render_template("login.html"), 403
-
     return render_template('index.html',message=" ",category=""), 200
 
 @app.route('/new_secreview', methods=['GET'])
@@ -87,6 +84,9 @@ def create_secreview():
     Product_Title = requestingfor
     if requestingfor not in ("others"):
         Product_Title = "["+requestingfor+"] "+args.get('Product_Title')
+
+    if requestingfor == "others":
+        Product_Title = "["+requestingfor+"] "+args.get('Request_Title')        
 
     component = JIRA_COMPONENTS["SECURITY_REVIEW"]
     if requestingfor == "sec_bug":
@@ -119,8 +119,6 @@ def create_secreview():
 
     result = create_new_jira(jira,JIRA_SETTINGS,Product_Title,description,component,peer_review_enabled,Issue_Severity)
 
-    # return jsonify(result)
-
     if result.key:
         redirect_url = JIRA_URL+"browse/"+result.key
 
@@ -133,8 +131,14 @@ def create_secreview():
         message="JiraError: "+str(result)+"<br />Please contact @mohan.kk",
         category="warning"), 200
 
+@app.route('/search_tickets')
+def search_tickets():
+    return render_template('search_tickets.html', message="Enter a JIRA ID to search", category="info"), 200
+
 @app.route('/close_tickets', methods=['GET','POST'])
-def close_tickets():
+@app.route('/close_tickets/<ticket_id>')
+@app.route('/search_tickets/<ticket_id>')
+def close_tickets(ticket_id=None):
     access_token = session.get('access_token')
     if access_token is None:
         return render_template("login.html",message="Please login to continue",category="info"), 403
@@ -144,14 +148,28 @@ def close_tickets():
         return render_template("index.html",message="You are not authorized",category="danger"), 403        
 
     if request.method == 'GET':
-        [secreview_string,secbugs_string] = get_open_tickets(jira,JIRA_SETTINGS,session.get('email'))
+
+        if not ticket_id:
+            args = request.args
+            ticket_id = args.get('ticket_id')
+
+        if ticket_id:
+            tickets = [str(i.strip().strip(JIRA_URL+"browse/")) for i in ticket_id.split(",")]
+            [secreview_string,secbugs_string, secreview_count,secbugs_count] = get_open_ticket_by_id(jira,JIRA_SETTINGS,tickets,session.get('email'))
+        else:
+            [secreview_string,secbugs_string, secreview_count,secbugs_count] = get_open_tickets(jira,JIRA_SETTINGS,session.get('email'))
+
         return render_template('close_tickets.html',
             peer_review_enabled = str(peer_review_enabled).lower(),
             PEER_REVIEW_REQUIRED_FOR = PEER_REVIEW_REQUIRED_FOR,
+            REVIEW_APPROVERS = REVIEW_APPROVERS,
             secreview_string = secreview_string,
             secbugs_string = secbugs_string,
             message="",
-            category=""), 200
+            category="",
+            secreview_count=secreview_count,
+            secbugs_count=secbugs_count
+            ), 200
 
     if request.method == "POST" and  "Action" in request.form:
         args = request.form
@@ -169,7 +187,7 @@ def close_tickets():
         status = check_status(str(issue.fields.status.name),requestingfor)
 
         if not status:
-            message = "Operation not allowed. Please retry after changing the JIRA state from Backlog/Todo/ToStart."
+            message = "Operation not allowed. Please retry after changing the JIRA state to <b style='color:red'>In Progress</b>."
             category = "warning"
             return_code = 403
             return render_template('index.html',message=message, category=category), return_code
@@ -200,7 +218,10 @@ def close_tickets():
 
 
         if action == "Approve" or action == "Send for Review":
-            checks = get_request_options(requestingfor)
+            if action == "Approve":
+                checks = get_request_options("review_options")
+            else:
+                checks = get_request_options(requestingfor)
 
             checks_message = "\n{code}"
             for arg in args:
@@ -243,6 +264,7 @@ def close_tickets():
 
 
         result = resolve_or_close_jira(jira,JIRA_TRANSITIONS,status,ticket_id,comment_message,action,approver)
+        # return jsonify(result)
 
         if not result:
             message = "Error occured. Please try again after checking Jira state"
@@ -250,7 +272,15 @@ def close_tickets():
             return_code = 403
             return render_template('index.html',message=message, category=category), return_code
 
-        return render_template('index.html',message=message, category=category), return_code
+        result_status = result[0]
+        result_msg = result[1]
+        if result_status:
+            return render_template('index.html',message=message, category=category), return_code
+        else:
+            return_code = 403
+            category = 'danger'
+            result_msg += "<br /><a href='"+url_for('close_tickets',ticket_id=ticket_id)+"'>Go Back</a>"
+            return render_template('index.html',message=result_msg, category=category), return_code
 
     return redirect(url_for('index')), 403
 
@@ -271,8 +301,13 @@ def get_tickets(jira_filter='-1'):
     return get_jira_issues(jira, JIRA_SETTINGS, JIRA_FILTERS[str(jira_filter).lower()], assignee, reporter, session.get('email'), since)
 
 @app.route('/ticket_states')
-@app.route('/ticket_states/')
-def ticket_statuses():
+@app.route('/ticket_states/<jira_type>')
+def ticket_statuses(jira_type=None):
+    args = request.args
+    jira_type = args.get('jira_type')
+    if jira_type == "secbug":
+        return get_jira_states(JIRA_SETTINGS, jira_type)
+
     return get_jira_states(JIRA_SETTINGS)
 
 
@@ -281,10 +316,12 @@ def do_followup():
 
     args = request.form
     key = args.get('ticket_id')
-    comment = args.get('comment')
     assignee = args.get('assigned')
     if '@' in assignee:
         assignee = assignee.split("@")[0]
+
+    comment = args.get('comment')
+    comment = comment+"\nPlease reach to [~"+session.get('email')+"] for any queries"
 
     followup_status = jira_followup(jira,key, comment, assignee)
 
@@ -346,8 +383,8 @@ with app.test_request_context('/'):
 
 with app.test_request_context('/'):
     def check_status(status,requestingfor):
-        # if requestingfor != 'sec_bug' and status in ("Backlog","To Do", "ToStart"):
-        #     return None
+        if requestingfor != 'sec_bug' and status in ("Backlog","To Do", "ToStart", "Open"):
+            return None
         return status
 
 
