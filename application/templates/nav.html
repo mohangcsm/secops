@@ -28,7 +28,16 @@
         </ul>
       </li>
       {% if session.appsec_user %}
-       <li><a href="/close_tickets"><span class="glyphicon glyphicon-off"></span> Close Tickets</a></li>
+       <!-- <li><a href="/close_tickets"><span class="glyphicon glyphicon-off"></span> Close Tickets</a></li> -->
+       <li>
+          <a class="dropdown-toggle" type="button" data-toggle="dropdown">
+          <span class="glyphicon glyphicon-off"></span> Close Tickets
+          <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/search_tickets"><span class="glyphicon glyphicon-search"></span> Close A Ticket</a></li>
+            <li><a href="/close_tickets"><span class="glyphicon glyphicon-book"></span> Get All Tickets</a></li>
+          </ul>
+       </li>
       {% endif %}
       <li class="dropdown line-spacing">
           <a class="dropdown-toggle" type="button" data-toggle="dropdown">
