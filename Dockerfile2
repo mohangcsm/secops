@@ -1,0 +1,11 @@
+FROM secops1
+
+ENV app /app
+
+WORKDIR $app
+RUN rm -rf $app/*
+COPY . $app
+
+EXPOSE 80
+
+ENTRYPOINT ["python", "./run.py"]

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>SECOPS</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/static/images/favicon.png" type="image/png" sizes="16x16">
+  <link href='/static/external/css.css' rel='stylesheet' type='text/css'> 
+  <link rel="stylesheet" href="/static/external/bootstrap.min.css">
+  <script src="/static/external/jquery-1.12.4.js"></script>
+  <script src="/static/external/bootstrap.min.js"></script>
+  <link href='/static/css/style.css' rel='stylesheet' type='text/css'> 
+  <script src='/static/external/index.js'></script>
+  <script src='https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js'></script>
+  <script src='https://cdn.jsdelivr.net/npm/underscore@1.13.1/underscore-umd-min.js'></script>
+
+  <link href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
+
+  <script src="//code.jquery.com/jquery-2.0.3.min.js"></script>
+
+
+  <meta id="JIRA_URL" data-name='{{config.JIRA_URL|safe}}'>
+
+</head>
+<body>
+<!-- navbar -->
+    {% include "nav.html" %}
+<!-- navbar -->
+<br /><br />
+<div>
+<div class="container-fluid">
+  <div class="row center">
+    <div class="container col-12" id="message" align="center">
+      {% if message %}
+          <div class="alert alert-{{ category }}" role="alert" style="width: 50%">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        {{ message | safe }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="row col-12 text-center h1">
+    3rd Party Library Inventory
+  </div>
+  <div class="row col-lg-12" >
+    <table
+      class="table table-light table-bordered"
+      data-toggle="table"
+      data-url="/lib-inventory-api"
+      data-pagination="true"
+      data-side-pagination="server"
+      data-search="true"
+      style="border: 1"
+      id="inventory_table"
+    >
+      <thead>
+        <tr>
+          <th data-formatter="sno_formatter" data-align="center" data-width="75">SNo</th>
+          <th data-field="inentory_name" data-width="250">Library Name</th>
+          <th data-field="priority" data-width="100">Priority</th>
+          <th data-field="component">Component</th>
+          <th data-field="Licence">Licence</th>
+          <th data-formatter="vuln_formatter" data-align="center" data-width="150">vulnerabilities</th>
+          <th data-field="status">Status</th>
+          <th data-field="created_on">Created Date</th>
+        </tr>
+      </thead>
+    </table>
+    <script>
+      function sno_formatter(value, row, index){
+        return index+1;
+      }
+
+      function vuln_formatter(index, row){
+        var ret = "<table class='table table-bordered'>";
+            ret += "<tr style='font-weight:bolder'><td style='background-color:red; color: white'>"+row.vulnerabilities['criticalCVEs']+"</td>";
+            ret += "<td style='background-color:orange; color: black'>"+row.vulnerabilities['highCVEs']+"</td>";
+            ret += "<td style='background-color:yellow; color: black'>"+row.vulnerabilities['mediumCVEs']+"</td>";
+            ret += "<td style='background-color:grey; color: black'>"+row.vulnerabilities['lowCVEs']+"</td></tr></table>";
+
+        return ret;
+      }
+
+      function queryParams(params){
+        params.pageSize = 10;
+        params.pageNumber = 1;
+
+        return params
+      }
+
+    </script>
+  </div>
+  
+  </div>
+<button type="button" class="btn btn-primary hidden" id="issues_btn" data-toggle="modal" data-target="#issuesModal">
+  ...
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="issuesModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title h5" id="issuesLabel">...</span>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="center">
+        <div class="modal-body pad issues_body" id="issues_body">
+          ...
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="loader h3" style="display: none" id="loader">Loading ...</div>
+ <style>
+    body {  
+      /*background: url("back1.jpg") no-repeat center center fixed; */
+      background-size: cover;
+    }
+
+    .loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin: -50px 0px 0px -50px;
+    }
+
+    .box {
+      height: 10vw;
+      width: 10vw;
+    }
+
+    .modal-header, h4, .close {
+      background-color: #182530;
+      color:white !important;
+      text-align: center;
+      font-size: 30px;
+    }
+    .modal-content{
+      background-color: #e6e6e6;
+    }
+    .modal-footer {
+        background-color: #182530;
+    }
+
+    .center {
+      align-self: center;
+      text-align: center;
+    }
+
+    .border {
+      border: solid 0px black;
+    }
+
+    .pad {
+      padding: 1vw;
+    }
+
+    .pad-top {
+      padding-top: 2.5vw;
+    }
+
+    .pad-bottom {
+     padding-bottom: 2.5vw; 
+    }
+
+    .dashboard {
+      margin-top: 1.5vw;
+    }
+
+    .x400x {
+      height: 400px;
+    }
+
+    #message {
+      margin-top: 30px;
+    }
+
+    .issues_body {
+      vertical-align: middle;
+      text-align: left;
+      overflow-y: scroll; 
+      max-height: 500px; 
+      min-height: 250px;
+    }
+
+    .state {
+      color: #55AA00;
+    }
+
+    body {
+      background-color: white;
+    }
+  </style>
+<!-- Footer -->
+{% extends "footer.html" %}
+<!-- Footer -->
+</body>
+</html>

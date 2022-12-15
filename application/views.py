@@ -53,9 +53,13 @@ google = oauth.remote_app(
     consumer_secret=app.config['GOOGLE_CLIENT_SECRET']
 )
 
+
 @app.route('/', methods=['GET'])
 @app.route('/dashboard', methods=['GET'])
 def index():
+    # if not session.get('access_token'):
+    #     return render_template("login.html"), 403
+
     return render_template('index.html',message=" ",category=""), 200
 
 @app.route('/new_secreview', methods=['GET'])
@@ -119,6 +123,8 @@ def create_secreview():
 
     result = create_new_jira(jira,JIRA_SETTINGS,Product_Title,description,component,peer_review_enabled,Issue_Severity)
 
+    # return jsonify(result)
+
     if result.key:
         redirect_url = JIRA_URL+"browse/"+result.key
 
@@ -128,16 +134,16 @@ def create_secreview():
         return render_template("index.html",message="Ticket raised successfully: "+result.key+".<br /><br /><a href='"+redirect_url+"' target='_blank'>click here to view the ticket.</a>")
 
     return render_template('new_secreview.html',
-        message="JiraError: "+str(result)+"<br />Please contact @mohan.kk",
+        message="JiraError: "+str(result)+"<br />Please contact Infosec Team",
         category="warning"), 200
 
 @app.route('/search_tickets')
 def search_tickets():
     return render_template('search_tickets.html', message="Enter a JIRA ID to search", category="info"), 200
 
+
 @app.route('/close_tickets', methods=['GET','POST'])
 @app.route('/close_tickets/<ticket_id>')
-@app.route('/search_tickets/<ticket_id>')
 def close_tickets(ticket_id=None):
     access_token = session.get('access_token')
     if access_token is None:
@@ -341,9 +347,59 @@ def rfp_base():
     return render_template('index.html',message="currently not available", category="warning"), 200
 
 
-@app.route('/code_review')
-def code_review():
-    args = re
+@app.route('/lib-inventory')
+def lib_inventory():
+    return render_template('inventory.html',message="", category=""), 200
+
+@app.route('/lib-inventory-api')
+def lib_inventory_api():
+
+    args = request.args
+
+    start = args.get('offset')
+    if not start:
+        start = 0
+
+    size = args.get('limit')
+    if not size:
+        size = 100
+
+    start = int(start)*int(size)
+
+    search = args.get('search')
+
+    query = 'SELECT * FROM inventory limit '+str(start)+','+str(size)
+    if search:
+        query = 'SELECT * FROM inventory where Licence LIKE "%'+search+'%" OR component LIKE "%'+search+'%" OR inentory_name LIKE "%'+search+'%" OR priority LIKE "%'+search+'%" OR project LIKE "%'+search+'%" OR status LIKE "%'+search+'%"'
+    
+
+    conn = get_db_connection()
+    libs = conn.execute(query).fetchall()
+
+    total = conn.execute('SELECT count(*) as count from inventory').fetchone()
+
+    conn.close()
+
+    dicts = []
+    ret = {}
+
+    ret['total'] = int(total['count'])
+    for lib in libs:
+        temp_dict = {}
+        for key in lib.keys():
+            if key == "vulnerabilities":
+                temp_dict[key] = json.loads(lib[key])
+            else:
+                temp_dict[key] = lib[key]
+
+        dicts.append(temp_dict)
+    
+    ret['rows'] = dicts
+    return jsonify(ret), 200
+
+#@app.route('/code_review')
+#def code_review():
+#    args = re
 
 
 @app.route('/options.json')
@@ -356,6 +412,12 @@ def request_options():
 
 
 ############ support functions ############
+with app.test_request_context('/'):
+    def get_db_connection():
+        conn = sqlite3.connect('inventory.db')
+        conn.row_factory = sqlite3.Row
+        return conn
+
 with app.test_request_context('/'):
     def is_appsec_user(email):
         appsec_users = app.config['APPSEC_USERS']
@@ -486,7 +548,7 @@ def server_error_403(e):
 def server_error_500(e):
     redirect = "login.html"
     
-    message="Something went wrong ! Please try again."
+    message="Something went terribly wrong ! Please Contact Infosec team."
     access_token = session.get('access_token')
     if access_token:
         redirect = "index.html"
