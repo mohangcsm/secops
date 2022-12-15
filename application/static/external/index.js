@@ -11,7 +11,7 @@ var request_options_all = (function() {
         $.ajax({
           'async': false,
           'global': false,
-          'url': "request_options.json",
+          'url': "/request_options.json",
           'dataType': "json",
           'success': function(data) {
             json = data;
@@ -28,7 +28,7 @@ var options_all = (function() {
         $.ajax({
           'async': false,
           'global': false,
-          'url': "options.json",
+          'url': "/options.json",
           'dataType': "json",
           'success': function(data) {
             json = data;
@@ -112,6 +112,9 @@ function requestingfor() {
           input.required = true;
           if(base_elements[index].hasOwnProperty("label"))
             createLabel(base_elements[index]['label']);
+
+	  if(base_elements[index]['type'] == "hidden")
+	    input.value = base_elements[index]['placeholder'];
         }
 
         if (elementType == "textarea"){
@@ -197,7 +200,7 @@ function requestingfor() {
   }
 
 function open_issue(key,status,summary,requestingfor,due_days){
-  if(status == "To Do" || status == "Waiting for customer")
+  if(status == "To Do" || status == "Waiting for customer" || status == "Open")
     alert("Ticket can not be Approved. Only Reject action allowed with JIRA status# "+status);
  
   if(requestingfor == "")
@@ -217,11 +220,12 @@ function open_issue(key,status,summary,requestingfor,due_days){
     }
 
   }
+
   var approve_action = document.createElement("INPUT");
   approve_action.type = "submit";
   approve_action.name = "Action";
-  // console.log(key,status,summary,requestingfor);
-  if(status.toLowerCase() == "under review" || !peer_review_needed)
+  var REVIEW_STATUS = ['internal code review in progess','under review'];
+  if (REVIEW_STATUS.includes(status.toLowerCase()) || !peer_review_needed)
     approve_action.value = "Approve";
   else
     approve_action.value = "Send for Review";
@@ -272,8 +276,11 @@ function open_issue(key,status,summary,requestingfor,due_days){
   hidden.value = requestingfor;
   hidden.name = "requestingfor";
 
-
-  var request_options = get_request_options(requestingfor);
+  if (REVIEW_STATUS.includes(status.toLowerCase()) || !peer_review_needed)
+    var request_options = get_request_options('review_options')
+  else
+    var request_options = get_request_options(requestingfor);
+  
   $.each(request_options, function(key,value){
     var input = document.createElement("LI");
     var text = document.createTextNode(key);
@@ -478,7 +485,7 @@ function get_states(){
   return $.ajax({
     'async': false,
     'global': false,
-    'url': "/ticket_states/",
+    'url': "/ticket_states/secbug",
     'dataType': "json",
     'beforeSend': function() {
         $(".loader").show();

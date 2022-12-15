@@ -20,12 +20,16 @@
             "Port Opening/Modification" : "sg_request",
             "IP Whitelisting" : "ip_whitelisting"
         },
+	"Credential Creation" : {
+            "SAST/DAST Credential Request" : "create_credential"
+	},
         "Others" : {
             "PRD Document Review" : "prd_review",
             "Architecture Review" : "arch_review",
             "Security Bug" : "sec_bug",
             "Security Code Scan" : "code_scan",
             "Falcon Review Request" : "falcon_request",
+            "SAST/DAST Credential Request" : "create_credential",
             "Others" : "others"
         }
     },
@@ -712,6 +716,34 @@
                 "innerHtml" : "Repository URL: \nRepository Branch: ",
                 "elementType" : "textarea"  
             }
-        ]
+        ],
+	"create_credential" : [
+            {
+                "name" : "Product_Title",
+                "type" : "hidden",
+                "placeholder" : "create_credential",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Team Name",
+                "name" : "team_name",
+                "type" : "text",
+                "placeholder" : "Enter your team name",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Manager Name",
+                "name" : "maneger_name",
+                "type" : "text",
+                "placeholder" : "Enter your manager name / email id",
+                "elementType" : "input"
+            },
+            {
+                "label" : "Please provide use case information",
+                "name" : "use_case",
+                "innerHtml" : "Please provide how you are intended to use the credentials",
+                "elementType" : "textarea"
+            }
+	]
     }
 }

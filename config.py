@@ -44,19 +44,30 @@ class Config(object):
     #-------oauth settings---------#
 
     #-------other settings---------#
-    ALLOWED_DOMAINS = ['gmail.com']
-    SECURITY_EMAIL = 'mohan.gcsm@gmail.com'
-    APPSEC_USERS = REVIEW_APPROVERS = ['mohan.gcsm@gmail.com']
-    DEFAULT_DOMAIN = "gmail.com"
-    DEFAULT_USER = "appsec" #must be a valid JIRA user.
-    PEER_REVIEW_ENABLED = False
+    ALLOWED_DOMAINS = ['gmail.com'] # add comma separated FQDNs here 
+    SECURITY_EMAIL = 'mohan.gcsm@gmail.com' # add infosec team handle here
+    APPSEC_USERS = REVIEW_APPROVERS = ['mohan.gcsm@gmail.com'] # add comma separated full email ids
+
+    DEFAULT_USER = "appsec" # default infosec JIRA User here
+    PEER_REVIEW_ENABLED = True
     PEER_REVIEW_REQUIRED_FOR = [
+        'client_vrm'
         'new_web_app',
         'new_mobile_app',
         'new_rest_api',
         'existing_web_app',
         'existing_mobile_app',
         'existing_rest_api',
+        'new_image'
+        'new_datastore',
+        'sg_request',
+        'sg_request',
+        'ip_whitelisting',
+        'prd_review',
+        'arch_review',
+        'sec_bug',
+        'code_scan',
+        'falcon_request',
         'other'
     ]
     #-------other settings---------#
@@ -68,17 +79,15 @@ class Config(object):
     VRM_POLICY_LINK = "<>"
     SEC_AWARENESS_LINK = "<>"
     INFOSEC_POLICY_LINK = "<>"
-    
     #-external page links settings-#
 
 
     #-------JIRA settings----------#
     JIRA_SETTINGS = {
-
         "JIRA_URL" : "<JIRA URL>",
         "JIRA_USER" : "<JIRA USERNAME>",
-        "JIRA_PASS" : "<JIRA TOKEN not PASSWORD>",
-        "JIRA_PROJECT" : "<JIRA PROJECT NAME>",
+        "JIRA_PASS" : "<JIRA USER TOKEN / PASSWORD>",
+        "JIRA_PROJECT" : "<JIRA PROJECT KEY>",
 
         "JIRA_TRANSITIONS" : [
             { # action ids with out peer review
@@ -89,9 +98,9 @@ class Config(object):
             },
             { # action ids with peer review
                 "TODO_TRANS" : 51, # move to To do from backlog action
-                "SEND_FOR_REVIEW_TRANS" : 51, # Send for review action
-                "REJECT_APPROVAL" : 61, # reject review action
-                "APPROVE_TRANS" : 71, # approve action
+                "SEND_FOR_REVIEW_TRANS" : 71, # Send for review action
+                "REJECT_APPROVAL" : 161, # reject review action
+                "APPROVE_TRANS" : 151, # approve action
                 "CLOSED_TRANS" : 101 # close or reject action
                
             }
@@ -100,21 +109,23 @@ class Config(object):
             "SECURITY_REVIEW" : "Security Review",
             "SECURITY_BUG" : "Security Bug"
         },
-
+        "CHUNK_SIZE" : 250,
         "JIRA_FILTERS" : {
-            "open_secreviews" : 10000,
-            "open_secbugs" : 10001,
-            "open_secreviews_2_weeks" : 10002,
-            "open_secreviews_by_me" : 10003,
-            "open_tickets" : 10006,
-            "total_secreviews" : 10004,
-            "total_secbugs" : 10005,
-            "total_secreviews_2_weeks" : 10007
+
+            "open_secreviews" : 26564,
+            "open_secbugs" : 26565,
+            "open_secreviews_2_weeks" : 26566,
+            "open_secreviews_by_me" : 26567,
+            "open_tickets" : 26570,
+            "total_secreviews" : 26568,
+            "total_secbugs" : 26569,
+            "total_codereviews" : 26571,
+            "total_secreviews_2_weeks" : 26573
         },
 
         "STATUS_N_SEVERITY" : {
-            "by_status" : ["Done", "Deployed", "Resolved", "Closed", "In Progress", "Under Review", "Waiting for customer", "To Do", "Open", "Reopened"],
-            "by_severity" : ["Highest", "High", "Medium", "Low", "Lowest"]
+            "by_status" : [],
+            "by_severity" : []
         },
 
         "STATUS_CODES" : {

@@ -1,4 +1,4 @@
-[![Github Release Version](https://img.shields.io/badge/release-V1.1-blue.svg)](https://github.com/mohangcsm/secops)
+[![Github Release Version](https://img.shields.io/badge/release-V1.0-blue.svg)](https://github.com/mohangcsm/secops)
 [![Python Version](https://img.shields.io/badge/python-2.7-blue.svg)](https://github.com/mohangcsm/secops)
 
 # SECOPS Framework for Centralised Product Security Operations.
@@ -27,9 +27,22 @@ $ git clone https://github.com/mohangcsm/secops.git
 $ cd secops
 ```
 Update the **config.py** file with required values as mentioned below section, then build and run docker with below commands. (change port mapping as defined in the config file)
+
+#### If you are planning to do continuous development:
+    - Build a temporary image with all dependencies installed
+    - Build the final image with preinstalled dependencies
+    - run secops container from the final image
+
 ```
-$ docker build --rm -t secops .
-$ docker run -p80:80 -v $(pwd):/app -d secops
+$ docker build -f Dockerfile --rm -t secops1 . 
+$ docker build -f Dockerfile2 --rm -t secops .
+$ docker run --rm -d -p 80:80 -p 443:443 secops 
+```
+
+#### If you are planning to use as it is:
+```
+$ docker build --rm -t secops . 
+$ docker run --rm -d -p 80:80 -p 443:443 secops 
 ```
 
 ##### Things to do before running: 
@@ -46,6 +59,7 @@ $ docker run -p80:80 -v $(pwd):/app -d secops
     - Create Workflow according to the requirement. Workflows required for 1-factor approval and 2-factor approval can be found in the `WORKFLOWS` folder
     - Create 2 jira componants with names `Security Reviews` and `Security Bugs`
     - create `JIRA filters` (with exact names) as mentioned in JIRA_SETTINGS
+
 #####
 ##### Enabling Peer Review & approval process
 - in **config.py** 
@@ -156,34 +170,36 @@ $ docker run -p80:80 -v $(pwd):/app -d secops
 #### Core Softwares :
     - Python 2.7
 
-
-### Changelog
-~~~~
-v1.1
- - Security Metrics added with multiple dashboards.
- - Option for adding Security Policies and guidelines added in menu.
- - Security Code review UI controls added.
- - UI based followup controls for security reviews and security bugs.
-
-v1.0
- - Unified Security review creation and Security Bug creation features added.
- - JSON based customisation for UI controls added.
- - Peer approval process added as a flag from configuration.
- - Auditing capabilities through JIRA workflow history.
-~~~~
-
-### Roadmap
-~~~~
- - Executive summary mailer for Security Metrics.
- - API Integration with DAST, SAST and FOSS tools.
-~~~~
-
 ### Lead Developer
-- Mohan Kallepalli (@mohankallepalli) 
+    - Mohan Kallepalli (@mohankallepalli) 
 
 ### Credits
-- Myntra Security Team
-- Moengage Security Team
+    - Myntra Security Team
+    - Flipkart Security Team
+    - Moengage Security Team
+
+### Changelog
+~~~
+v1.2
+    - 3rd party dependency library integrated
+    - Additional request options added
+
+v1.1
+    - Security Metrics added with multiple dashboards.
+    - Option for adding Security Policies and guidelines added in menu.
+    - Security Code review UI controls added.
+    - UI based followup controls for security reviews and security bugs.
+
+v1.0
+    - Unified Security review creation and Security Bug creation features added.
+    - JSON based customisation for UI controls added.
+    - Peer approval process added as a flag from configuration.
+    - Auditing capabilities through JIRA workflow history.
+~~~
+
+### Roadmap
+    - Executive summary mailer for Security Metrics.
+    - API Integration with DAST, SAST and FOSS tools.
 
 ##### License: Apache 2.0
 ~~~~

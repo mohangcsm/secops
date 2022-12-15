@@ -10,6 +10,6 @@ RUN apt-get update && apt-get install nano
 RUN python -m pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-EXPOSE 80
+EXPOSE 80 443
 
 ENTRYPOINT ["python", "./run.py"]

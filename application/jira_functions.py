@@ -30,15 +30,19 @@ def create_new_jira(jira,JIRA_SETTINGS,product_title="", description="",componen
     duedate = 21
     if Issue_Severity in ["Highest","P0 (Blocker)"]:
         duedate = 5
-    
+        Issue_Severity = 'P0 (Blocker)'
+
     if Issue_Severity in ["High","P1 (Critical)","Urgent"]:
         duedate = 14
-    
+	Issue_Severity = 'P1 (Critical)'
+
     if Issue_Severity in ["Medium","P2 (Major)"]:
         duedate = 21
-    
+	Issue_Severity = 'P2 (Major)'
+
     if Issue_Severity in ["Low", "Lowest", "P3 (Minor)", "P4 (Trivial)", "None"]:
         duedate = 28
+	Issue_Severity = 'P3 (Minor)'
 
     duedate = datetime.now() + timedelta(duedate)
 
@@ -59,6 +63,8 @@ def create_new_jira(jira,JIRA_SETTINGS,product_title="", description="",componen
         },
         "duedate" : duedate.strftime('%Y-%m-%d')
     }
+
+    # return fields
 
     try:
         result = jira.create_issue(fields = fields)
@@ -81,7 +87,7 @@ def get_jira_issues(jira, JIRA_SETTINGS, jira_filter, assignee=None, reporter=No
         jira_filter = jira_filter+' AND reporter=\"'+str(reporter)+'\"'
 
     if since:
-        jira_filter = jira_filter+' AND createdDate >= '+str(since)
+        jira_filter = jira_filter+' AND  createdDate >= '+str(since)
 
     # return jsonify(jira_filter)
     open_issues = jira.search_issues(jira_filter, maxResults=500)
@@ -131,6 +137,24 @@ def get_jira_states(JIRA_SETTINGS, jira_type=None):
                 for status in state['statuses']:
                     if status['name'] not in jira_states['by_status']:
                         jira_states['by_status'].append(status['name'])
+
+    if jira_type != "secbug":
+        states = requests.get(JIRA_URL+'rest/api/latest/project/SEC/statuses', auth=HTTPBasicAuth(JIRA_USER, JIRA_PASS), verify=False).json()
+        if 'errorMessages' not in states:
+            for state in states:
+                if state['name'] in ["Task","Bug"]:
+                    for status in state['statuses']:
+                        if status['name'] not in jira_states['by_status']:
+                            jira_states['by_status'].append(status['name'])
+
+        states = requests.get(JIRA_URL+'rest/api/latest/project/AS/statuses', auth=HTTPBasicAuth(JIRA_USER, JIRA_PASS), verify=False).json()
+        if 'errorMessages' not in states:
+            for state in states:
+                if state['name'] in ["Bug"]:
+                    for status in state['statuses']:
+                        if status['name'] not in jira_states['by_status']:
+                            jira_states['by_status'].append(status['name'])
+
 
 
     states = requests.get(JIRA_URL+'rest/api/latest/priority', auth=HTTPBasicAuth(JIRA_USER, JIRA_PASS), verify=False).json()
@@ -254,6 +278,17 @@ def get_jira_issue_strings(open_issues, JIRA_SETTINGS,user_email):
                 secbugs_count += 1
                 break
 
+        if not components_found:
+            if key.startswith('SEC-'):
+                msg_string += '<td><a class="secreview" onclick="open_issue(\''+key+'\',\''+status+'\',\''+summary+'\',\''+requestingfor+'\',\''+due_days+'\')" href="#"><button type="button" class="btn btn-primary pull-right">Close Ticket</button></a></td></tr>'
+                secreview_string += msg_string
+                secreview_count += 1
+
+            if key.startswith('AS-'):
+                msg_string += '<td><a class="secreview" onclick="open_issue(\''+key+'\',\''+status+'\',\''+summary+'\',\''+requestingfor+'\',\''+due_days+'\')" href="#"><button type="button" class="btn btn-primary pull-right">Close Bug</button></a></td></tr>'
+                secbugs_string += msg_string
+                secbugs_count += 1
+
     return [secreview_string,secbugs_string, secreview_count,secbugs_count]
 
 
@@ -301,12 +336,18 @@ def resolve_or_close_jira(jira,JIRA_TRANSITIONS,status,key,comments,action=None,
 
     return [None,msg]
 
-def jira_followup(jira, key, comment, assignee='mohan.gcsm@gmail.com'):
+def jira_followup(jira, key, comment, assignee='appsec'):
     return_obj = {}
     return_obj['key'] = key
 
+    # accId = ""
+    # accId = get_jira_accId(assignee)
+    # if not key or not comment:
+    #     return_obj['status'] = "error"
+    #     return_obj['message'] = "key or comment missing"
+    # else:
     if "@" not in assignee:
-        assignee = assignee+"@"+app.config['DEFAULT_DOMAIN']
+        assignee = assignee+"@"+app.config['ALLOWED_DOMAINS'][0]
 
     comment = "[~"+assignee+"]\n\n"+comment
     try:
@@ -320,10 +361,22 @@ def jira_followup(jira, key, comment, assignee='mohan.gcsm@gmail.com'):
         return_obj['message'] = ae
 
     return return_obj
+    
+
+def get_jira_accId(user):
+
+    user = requests.get(JIRA_URL+'rest/api/latest/user/search?query='+user, auth=HTTPBasicAuth(JIRA_USER, JIRA_PASS), verify=False).json()
+    if(len(user)):
+        user = user[0]
+        accId = user['accountId']
+    else:
+        accId = get_jira_accId(DEFAULT_USER)
+
+    return accId
 
 def assign_issue(jira, key, assignee):
     if "@" not in assignee:
-        assignee = assignee+"@"+app.config['DEFAULT_DOMAIN']
+        assignee = assignee+"@"+app.config['ALLOWED_DOMAINS'][0]
 
     try:
         assignment_status = jira.assign_issue(key, assignee)
@@ -331,6 +384,20 @@ def assign_issue(jira, key, assignee):
             return "Success"
     except Exception, ae:
         return "Failed"
+
+    # accId = get_jira_accId(assignee)
+
+    # payload = {'accountId': accId}
+
+    # assignment_status = None
+    # try:
+    #     assignment_status = requests.put(JIRA_URL+'rest/api/latest/issue/'+key+'/assignee', json=payload, auth=HTTPBasicAuth(JIRA_USER, JIRA_PASS), verify=False)
+    #     if assignment_status.status_code == 204:
+    #         return "Success"
+
+    # except Exception, ae:
+    #     return "Failed"
+
 
     return "Failed"
 
