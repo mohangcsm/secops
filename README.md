@@ -36,7 +36,7 @@ Update the **config.py** file with required values as mentioned below section, t
 ```
 $ docker build -f Dockerfile --rm -t secops1 . 
 $ docker build -f Dockerfile2 --rm -t secops .
-$ docker run --rm -d -p 80:80 -p 443:443 secops 
+$ docker run --rm -v $(pwd):/app -d -p 80:80 -p 443:443 secops 
 ```
 
 #### If you are planning to use as it is:
