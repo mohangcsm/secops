@@ -1,7 +1,7 @@
 
 from flask import jsonify
 from requests.auth import HTTPBasicAuth
-import requests
+import json, requests
 from datetime import datetime, timedelta
 from application import app
 
@@ -18,6 +18,13 @@ JIRA_PROJECT = JIRA_SETTINGS["JIRA_PROJECT"]
 JIRA_COMPONENTS = JIRA_SETTINGS["JIRA_COMPONENTS"]
 JIRA_FILTERS = JIRA_SETTINGS["JIRA_FILTERS"]
 JIRA_TRANSITIONS = JIRA_SETTINGS['JIRA_TRANSITIONS']
+
+# def get_issue(jira, ticket_id):
+auth = HTTPBasicAuth(JIRA_USER, JIRA_PASS)
+headers = {"Accept": "application/json","Content-Type": "application/json"}
+
+
+
 
 def create_new_jira(jira,JIRA_SETTINGS,product_title="", description="",component="Security Review",peer_review_enabled=False,Issue_Severity="Medium"):
     
@@ -66,8 +73,20 @@ def create_new_jira(jira,JIRA_SETTINGS,product_title="", description="",componen
 
     # return fields
 
+    url = JIRA_URL+"rest/api/latest/issue"
+    payload = json.dumps({'fields':fields})
+
     try:
-        result = jira.create_issue(fields = fields)
+        # result = jira.create_issue(fields = fields)
+        result = requests.request(
+           "POST",
+           url,
+           data=payload,
+           headers=headers,
+           auth=auth,
+           verify=False
+        ).json()
+        # print result
         return result
     
     except Exception, ae:
@@ -76,6 +95,60 @@ def create_new_jira(jira,JIRA_SETTINGS,product_title="", description="",componen
         # return False
 
     return None
+
+def search_issues(jql="project="+JIRA_PROJECT, total=30):
+    url = JIRA_URL+"rest/api/latest/search"
+
+    query = {
+      'jql': jql,
+      'maxResults': total
+    }
+
+    open_issues = requests.request(
+       "GET",
+       url,
+       headers=headers,
+       params=query,
+       auth=auth,
+       verify=False
+    ).json()
+
+    return open_issues['issues']
+
+def transition_issue(key=0, transaction_id=0, fields={}, comments=""):
+    payload = json.dumps({
+      "transition": { 
+         "id": transaction_id 
+      } 
+    })
+    
+    if comments != "":
+        payload = json.dumps({
+           "update": { 
+              "comment":[{ 
+                 "add": { 
+                    "body": comments
+                  } 
+              }] 
+           }, 
+          "transition": { 
+             "id": transaction_id 
+          } 
+        })
+
+    url = JIRA_URL+"rest/api/latest/issue/"+key+"/transitions"
+
+    response = requests.request(
+       "POST",
+       url,
+       data=payload,
+       headers=headers,
+       auth=auth,
+       verify=False
+    )
+
+    return response
+
 
 def get_jira_issues(jira, JIRA_SETTINGS, jira_filter, assignee=None, reporter=None, user_email=None, since=None):
 
@@ -89,8 +162,10 @@ def get_jira_issues(jira, JIRA_SETTINGS, jira_filter, assignee=None, reporter=No
     if since:
         jira_filter = jira_filter+' AND  createdDate >= '+str(since)
 
-    # return jsonify(jira_filter)
-    open_issues = jira.search_issues(jira_filter, maxResults=500)
+
+    open_issues = search_issues(jira_filter, 500)
+
+    # open_issues = jira.search_issues(jira_filter, maxResults=500)
     return jsonify(create_dashboard_stats(open_issues, JIRA_SETTINGS, user_email))
 
 
@@ -99,18 +174,24 @@ def create_dashboard_stats(open_issues, JIRA_SETTINGS, user_email):
     issue_statusses = {}
     issue_priorities = {}
 
+    from pprint import pprint
+
+    # print(open_issues)
+    # return return_obj
+
     for open_issue in open_issues:
-        key = str(open_issue.key)
-        summary = str(open_issue.fields.summary)
+        print(type(open_issue))
+        key = str(open_issue['key'])
+        summary = str(open_issue['fields']['summary'])
         
-        status = str(open_issue.fields.status.name)
+        status = str(open_issue['fields']['status']['name'])
         if status not in issue_statusses:
             issue_statusses[status] = []
 
         if key not in issue_statusses[status]:
             issue_statusses[status].append({key:summary})
 
-        priority = str(open_issue.fields.priority.name)
+        priority = str(open_issue['fields']['priority']['name'])
         if priority not in issue_priorities:
             issue_priorities[priority] = []
 
@@ -170,7 +251,7 @@ def get_jira_states(JIRA_SETTINGS, jira_type=None):
 
 def get_open_tickets(jira,JIRA_SETTINGS,user_email):
 
-    open_issues = jira.search_issues('filter='+str(JIRA_FILTERS['open_tickets']), maxResults=1000)
+    open_issues = search_issues('filter='+str(JIRA_FILTERS['open_tickets']), 500)
 
     return get_jira_issue_strings(open_issues, JIRA_SETTINGS, user_email);
 
@@ -178,7 +259,7 @@ def get_open_ticket_by_id(jira,JIRA_SETTINGS,ticket_id,user_email):
 
     jql = 'key in ('+str(ticket_id).strip("[").strip("]")+')'
     
-    open_issues = jira.search_issues(jql, maxResults=10)
+    open_issues = search_issues(jql, 10)
     
     return get_jira_issue_strings(open_issues, JIRA_SETTINGS, user_email);    
 
@@ -190,7 +271,7 @@ def get_jira_issue_strings(open_issues, JIRA_SETTINGS,user_email):
     secbugs_count = 0
 
     for open_issue in open_issues:
-        status = str(open_issue.fields.status.name)
+        status = str(open_issue['fields']['status']['name'])
         icon = 'glyphicon glyphicon-hourglass icon_info blue" title="Open'
         if status == "In Progress" or status == "InDevelopment" :
             icon = 'glyphicon glyphicon-road icon_info green" title="In Progress'
@@ -201,16 +282,16 @@ def get_jira_issue_strings(open_issues, JIRA_SETTINGS,user_email):
         if status == "Under Review":
             icon = 'glyphicon glyphicon-fire icon_info red" title="Under Review'
 
-        key = str(open_issue.key)
-        summary = str(open_issue.fields.summary)
+        key = str(open_issue['key'])
+        summary = str(open_issue['fields']['summary'])
 
-        assignee = open_issue.fields.assignee
+        assignee = open_issue['fields']['assignee']
         if assignee:
-            assignee = str(assignee.emailAddress)
+            assignee = str(assignee['emailAddress'])
         else:
             assignee = user_email
 
-        description = str(open_issue.fields.description).lower()
+        description = str(open_issue['fields']['description']).lower()
         descriptions = description.split("\n")
 
         requestingfor = ""
@@ -226,7 +307,7 @@ def get_jira_issue_strings(open_issues, JIRA_SETTINGS,user_email):
 
         requestingfor = requestingfor.rstrip().lstrip();
 
-        due_date = str(open_issue.fields.duedate)
+        due_date = str(open_issue['fields']['duedate'])
         
         due_days = "-9999"
         if due_date != "None":
@@ -260,18 +341,18 @@ def get_jira_issue_strings(open_issues, JIRA_SETTINGS,user_email):
         else:
             msg_string += '<td><a onclick="alert(\'Due date is not set.\')" href="#"><button class="btn btn-'+follow_class+' btn-md"  >'+follow_days+'</button></a></td>'
                 
-        components = open_issue.fields.components
+        components = open_issue['fields']['components']
         components_found = False
 
         for component in components:
-            if str(component.name) == JIRA_COMPONENTS["SECURITY_REVIEW"]:
+            if str(component['name']) == JIRA_COMPONENTS["SECURITY_REVIEW"]:
                 msg_string += '<td><a class="secreview pull-right" onclick="open_issue(\''+key+'\',\''+status+'\',\''+summary+'\',\''+requestingfor+'\',\''+due_days+'\')" href="#"><button type="button" class="btn btn-primary">Close Ticket</button></a></td></tr>'
                 secreview_string += msg_string
                 components_found = True
                 secreview_count += 1
                 break
 
-            if str(component.name) == JIRA_COMPONENTS["SECURITY_BUG"]:
+            if str(component['name']) == JIRA_COMPONENTS["SECURITY_BUG"]:
                 msg_string += '<td><a class="secreview pull-right" onclick="open_issue(\''+key+'\',\''+status+'\',\''+summary+'\',\''+requestingfor+'\',\''+due_days+'\')" href="#"><button type="button" class="btn btn-primary">Close Bug</button></a></td></tr>'
                 secbugs_string += msg_string
                 components_found = True
@@ -317,21 +398,21 @@ def resolve_or_close_jira(jira,JIRA_TRANSITIONS,status,key,comments,action=None,
         fields = None
 
     try:
-        result = jira.transition_issue(key, transaction_id, fields=fields, comment=comments)
+        result = transition_issue(key, transaction_id, fields=fields, comments=comments)
         msg = None
         if approver:
             try:
-                jira.assign_issue(key,approver)
+                assign_issue(key,approver)
             except Exception as ae:
-                app.logger.warning(str(ae.text))
-                msg = str(ae.text)
+                app.logger.warning(str(ae))
+                msg = str(ae)
                 return [False, msg]
 
         return [True,msg]
 
     except Exception as ae:
-        app.logger.warning(str(ae.text))
-        msg = str(ae.text)
+        app.logger.warning(str(ae))
+        msg = str(ae)
         return [False, msg]
 
     return [None,msg]
@@ -351,7 +432,8 @@ def jira_followup(jira, key, comment, assignee='appsec'):
 
     comment = "[~"+assignee+"]\n\n"+comment
     try:
-        jira.add_comment(key,comment)
+        # jira.add_comment(key,comment)
+        add_comment(key,comment)
         return_obj['status'] = "suucess"
         return_obj['message'] = "Followup comment added on Issue: "+key
         return_obj['assignee'] = assignee
@@ -361,11 +443,37 @@ def jira_followup(jira, key, comment, assignee='appsec'):
         return_obj['message'] = ae
 
     return return_obj
+
+def add_comment(key=0, comment=""):
+    payload = json.dumps({"body": comment})
+
+    url = JIRA_URL+"rest/api/latest/issue/"+key+"/comment"
+
+    response = requests.request(
+       "POST",
+       url,
+       data=payload,
+       headers=headers,
+       auth=auth,
+       verify=False
+    ).json()
+
+    return response
     
 
 def get_jira_accId(user):
+    url = JIRA_URL+'rest/api/latest/user/search?query='+user
 
-    user = requests.get(JIRA_URL+'rest/api/latest/user/search?query='+user, auth=HTTPBasicAuth(JIRA_USER, JIRA_PASS), verify=False).json()
+    user = requests.request(
+        "GET",
+        url,
+        headers=headers,
+        auth=auth,
+        verify=False
+    ).json()
+
+    print user
+
     if(len(user)):
         user = user[0]
         accId = user['accountId']
@@ -374,37 +482,62 @@ def get_jira_accId(user):
 
     return accId
 
-def assign_issue(jira, key, assignee):
+def assign_issue(key, assignee):
     if "@" not in assignee:
         assignee = assignee+"@"+app.config['ALLOWED_DOMAINS'][0]
 
+    payload = {'name': assignee}
+
+    assignment_status = None
     try:
-        assignment_status = jira.assign_issue(key, assignee)
-        if assignment_status:
+        url = JIRA_URL+'rest/api/latest/issue/'+key+'/assignee'
+        
+        assignment_status = requests.request(
+           "PUT",
+           url,
+           data=payload,
+           headers=headers,
+           auth=auth,
+           verify=False
+        ).json()
+
+        if assignment_status['status_code'] == 204:
             return "Success"
+
     except Exception, ae:
         return "Failed"
-
-    # accId = get_jira_accId(assignee)
-
-    # payload = {'accountId': accId}
-
-    # assignment_status = None
-    # try:
-    #     assignment_status = requests.put(JIRA_URL+'rest/api/latest/issue/'+key+'/assignee', json=payload, auth=HTTPBasicAuth(JIRA_USER, JIRA_PASS), verify=False)
-    #     if assignment_status.status_code == 204:
-    #         return "Success"
-
-    # except Exception, ae:
-    #     return "Failed"
 
 
     return "Failed"
 
 def link_issue(jira, key1, key2):
+
+    url = JIRA_URL+"rest/api/latest/issueLink"
+    payload = json.dumps({
+      "inwardIssue": {
+        "key": key1
+      },
+      "outwardIssue": {
+        "key": key2
+      },
+      "type": {
+        "name": "blocks"
+      }
+    })
+
+
     try:
-        link_status = jira.create_issue_link('blocks', key1, key2)
-        if link_status.status_code == 201:
+        # link_status = jira.create_issue_link('blocks', key1, key2)
+        link_status = requests.request(
+           "POST",
+           url,
+           data=payload,
+           headers=headers,
+           auth=auth,
+           verify=False
+        )
+
+        if link_status['status_code'] == 201:
             return "Success"
 
         return "Failed"
