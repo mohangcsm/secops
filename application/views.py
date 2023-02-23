@@ -1,5 +1,6 @@
 import flask, time, sys, json, sqlite3, os, sys, random, string, hashlib, subprocess, requests
 
+from requests.auth import HTTPBasicAuth
 from flask import render_template, session, jsonify, request, Response, flash
 from flask import flash, current_app, redirect, url_for, send_from_directory
 from flask_oauth import OAuth
@@ -31,13 +32,15 @@ REVIEW_APPROVERS = app.config['REVIEW_APPROVERS']
 JIRA_COMPONENTS = JIRA_SETTINGS['JIRA_COMPONENTS']
 JIRA_FILTERS = JIRA_SETTINGS["JIRA_FILTERS"]
 JIRA_OPTIONS = {'server': JIRA_URL,'verify':False}
+JIRA_AUTH=HTTPBasicAuth(JIRA_USER, JIRA_PASS)
 
 DEFAULT_USER = app.config['DEFAULT_USER']
 
 app.config['JIRA_URL'] = JIRA_URL
 user_email = ""
 
-jira = JIRA(JIRA_OPTIONS, basic_auth=(JIRA_USER,JIRA_PASS))
+# jira = JIRA(JIRA_OPTIONS, basic_auth=(JIRA_USER,JIRA_PASS))
+jira = {}
 
 oauth = OAuth()
 google = oauth.remote_app(
@@ -125,13 +128,13 @@ def create_secreview():
 
     # return jsonify(result)
 
-    if result.key:
-        redirect_url = JIRA_URL+"browse/"+result.key
+    if 'key' in result:
+        redirect_url = JIRA_URL+"browse/"+result['key']
 
         if requestingfor == "sec_bug" and "Parent_Ticket" in args:
-            link_status = link_issue(jira, result.key, args.get("Parent_Ticket"))
+            link_status = link_issue(jira, result['key'], args.get("Parent_Ticket"))
 
-        return render_template("index.html",message="Ticket raised successfully: "+result.key+".<br /><br /><a href='"+redirect_url+"' target='_blank'>click here to view the ticket.</a>")
+        return render_template("index.html",message="Ticket raised successfully: "+result['key']+".<br /><br /><a href='"+redirect_url+"' target='_blank'>click here to view the ticket.</a>")
 
     return render_template('new_secreview.html',
         message="JiraError: "+str(result)+"<br />Please contact Infosec Team",
@@ -183,14 +186,17 @@ def close_tickets(ticket_id=None):
         return_code = 200
 
         ticket_id = args.get('ticket_id')
-        issue = jira.issue(ticket_id)
+        # issue = jira.issue(ticket_id)
+        issue = search_issues("key="+ticket_id)
+        if len(issue):
+            issue = issue[0]
 
         requestingfor = args.get('requestingfor')
         comments = args.get('comments')
         approver = args.get('approver')
         action = args.get('Action')
 
-        status = check_status(str(issue.fields.status.name),requestingfor)
+        status = check_status(str(issue['fields']['status']['name']),requestingfor)
 
         if not status:
             message = "Operation not allowed. Please retry after changing the JIRA state to <b style='color:red'>In Progress</b>."
@@ -207,7 +213,7 @@ def close_tickets(ticket_id=None):
 
         peer_review_required = False
         for review_id in PEER_REVIEW_REQUIRED_FOR:
-            if review_id in str(issue.fields.summary):
+            if review_id in str(issue['fields']['summary']):
                 peer_review_required = True
 
         not_allowed = (action == "Approve" and peer_review_required and  status == "In Progress")
@@ -420,6 +426,7 @@ with app.test_request_context('/'):
 
 with app.test_request_context('/'):
     def is_appsec_user(email):
+        # return True
         appsec_users = app.config['APPSEC_USERS']
         if email in appsec_users:
             return True

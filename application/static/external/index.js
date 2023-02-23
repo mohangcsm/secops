@@ -225,7 +225,7 @@ function open_issue(key,status,summary,requestingfor,due_days){
   approve_action.type = "submit";
   approve_action.name = "Action";
   var REVIEW_STATUS = ['internal code review in progess','under review'];
-  if (REVIEW_STATUS.includes(status.toLowerCase()) || !peer_review_needed)
+  if (REVIEW_STATUS.includes(status.toLowerCase()) && !peer_review_needed)
     approve_action.value = "Approve";
   else
     approve_action.value = "Send for Review";
@@ -276,7 +276,7 @@ function open_issue(key,status,summary,requestingfor,due_days){
   hidden.value = requestingfor;
   hidden.name = "requestingfor";
 
-  if (REVIEW_STATUS.includes(status.toLowerCase()) || !peer_review_needed)
+  if (REVIEW_STATUS.includes(status.toLowerCase()) && !peer_review_needed)
     var request_options = get_request_options('review_options')
   else
     var request_options = get_request_options(requestingfor);
